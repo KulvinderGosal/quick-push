@@ -1,0 +1,2291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PushEngage Extension</title>
+  <link rel="stylesheet" href="styles/theme.css">
+  <style>
+    /* ── LAYOUT ──────────────────────────────────────── */
+    .screen {
+      display: flex;
+      flex-direction: column;
+      min-height: 100%;
+    }
+    .screen-scroll {
+      flex: 1;
+      overflow-y: auto;
+      padding-bottom: var(--space-xl);
+      background: var(--pe-white);
+    }
+
+    /* ── HEADER ──────────────────────────────────────── */
+    .header {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: var(--space-sm) var(--space-lg);
+      background: var(--pe-navy);
+      border-bottom: none;
+      box-shadow: 0 2px 8px rgba(25, 26, 53, 0.15);
+    }
+    .header-logo {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-weight: 700;
+      font-size: var(--text-md);
+      color: var(--pe-white);
+      flex-shrink: 0;
+      letter-spacing: 0.5px;
+    }
+    .header-logo svg {
+      width: 28px;
+      height: 28px;
+    }
+    .header-logo svg path {
+      fill: var(--pe-white);
+    }
+    .header-logo .logo-wordmark {
+      height: 14px;
+      width: auto;
+    }
+    .header-logo .logo-wordmark path {
+      fill: var(--pe-white);
+    }
+    .header-center {
+      flex: 1;
+      display: flex;
+      justify-content: center;
+    }
+    .header-right {
+      flex-shrink: 0;
+    }
+
+    /* ── DROPDOWN (site selector / user menu) ────────── */
+    .dropdown {
+      position: relative;
+      display: inline-block;
+    }
+    .dropdown-trigger {
+      display: flex;
+      align-items: center;
+      gap: var(--space-xs);
+      padding: var(--space-xs) var(--space-sm);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: var(--radius-md);
+      background: rgba(255, 255, 255, 0.1);
+      font-size: var(--text-sm);
+      font-family: var(--font-family);
+      color: var(--pe-white);
+      cursor: pointer;
+      max-width: 200px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      transition: all var(--transition-fast);
+      backdrop-filter: blur(4px);
+    }
+    .dropdown-trigger:hover {
+      border-color: rgba(255, 255, 255, 0.35);
+      background: rgba(255, 255, 255, 0.18);
+    }
+    .dropdown-trigger:focus-visible {
+      outline: 2px solid var(--pe-gold);
+      outline-offset: 1px;
+    }
+    .dropdown-trigger .caret {
+      flex-shrink: 0;
+      width: 10px;
+      height: 10px;
+      transition: transform var(--transition-fast);
+      opacity: 0.7;
+    }
+    .dropdown[aria-expanded="true"] .caret {
+      transform: rotate(180deg);
+    }
+    .dropdown-panel {
+      position: absolute;
+      top: calc(100% + 6px);
+      left: 50%;
+      transform: translateX(-50%);
+      min-width: 240px;
+      max-height: 320px;
+      overflow-y: auto;
+      background: var(--pe-white);
+      border: 1px solid var(--pe-gray-200);
+      border-radius: var(--radius-lg);
+      box-shadow: 0 12px 28px rgba(25, 26, 53, 0.15);
+      z-index: 200;
+      padding: var(--space-xs) 0;
+    }
+    .dropdown-item {
+      display: flex;
+      align-items: center;
+      gap: var(--space-sm);
+      width: 100%;
+      padding: var(--space-sm) var(--space-lg);
+      border: none;
+      background: none;
+      font-family: var(--font-family);
+      font-size: var(--text-sm);
+      color: var(--pe-navy);
+      cursor: pointer;
+      text-align: left;
+    }
+    .dropdown-item:hover,
+    .dropdown-item:focus-visible {
+      background: var(--pe-gray-50);
+    }
+    .dropdown-item[aria-current="true"] {
+      color: var(--pe-blue);
+      font-weight: 600;
+    }
+    .dropdown-item[aria-current="true"]::after {
+      content: "";
+      display: inline-block;
+      width: 14px;
+      height: 14px;
+      margin-left: auto;
+      background: var(--pe-blue);
+      mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='currentColor'%3E%3Cpath fill-rule='evenodd' d='M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z' clip-rule='evenodd'/%3E%3C/svg%3E");
+      mask-size: contain;
+      -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='currentColor'%3E%3Cpath fill-rule='evenodd' d='M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z' clip-rule='evenodd'/%3E%3C/svg%3E");
+      -webkit-mask-size: contain;
+    }
+    .dropdown-link {
+      display: flex;
+      align-items: center;
+      gap: var(--space-sm);
+      width: 100%;
+      padding: var(--space-sm) var(--space-lg);
+      border: none;
+      background: none;
+      font-family: var(--font-family);
+      font-size: var(--text-sm);
+      color: var(--pe-blue);
+      cursor: pointer;
+      text-align: left;
+      font-weight: 500;
+    }
+    .dropdown-link:hover {
+      background: var(--pe-blue-light);
+    }
+    .dropdown-divider {
+      height: 1px;
+      margin: var(--space-xs) 0;
+      background: var(--pe-gray-200);
+    }
+    .dropdown-label {
+      padding: var(--space-xs) var(--space-lg);
+      font-size: var(--text-xs);
+      color: var(--pe-gray-500);
+      font-weight: 500;
+    }
+    .dropdown-item--danger {
+      color: var(--pe-red);
+    }
+    .dropdown-item--muted {
+      font-size: var(--text-xs);
+      color: var(--pe-gray-400);
+      cursor: default;
+      pointer-events: none;
+    }
+
+    /* ── USER AVATAR BUTTON ──────────────────────────── */
+    .avatar-btn {
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      border: 2px solid rgba(255, 255, 255, 0.25);
+      background: rgba(59, 67, 255, 0.3);
+      color: var(--pe-white);
+      font-size: var(--text-sm);
+      font-weight: 600;
+      font-family: var(--font-family);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all var(--transition-fast);
+    }
+    .avatar-btn:hover {
+      border-color: var(--pe-gold);
+      background: rgba(59, 67, 255, 0.5);
+    }
+    .avatar-btn:focus-visible {
+      outline: 2px solid var(--pe-blue);
+      outline-offset: 1px;
+    }
+
+    /* ── USER MENU DROPDOWN ──────────────────────────── */
+    .user-menu-panel {
+      right: 0;
+      left: auto;
+      transform: none;
+      min-width: 220px;
+    }
+
+    /* ── HEADER NUDGE ─────────────────────────────────── */
+    .header-nudge {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: var(--space-xs);
+      padding: 8px var(--space-lg);
+      background: linear-gradient(135deg, var(--pe-blue-light) 0%, #F0F0FF 100%);
+      border-bottom: 1px solid var(--pe-gray-200);
+      font-size: var(--text-xs);
+      color: var(--pe-gray-700);
+      cursor: pointer;
+      transition: all var(--transition-fast);
+      border: none;
+      width: 100%;
+      text-align: center;
+      line-height: 1.4;
+    }
+    .header-nudge:hover {
+      background: linear-gradient(135deg, #DEE0FF 0%, #E8E8FF 100%);
+    }
+    .header-nudge:focus-visible {
+      outline: 2px solid var(--pe-blue);
+      outline-offset: -2px;
+    }
+    .header-nudge-icon {
+      font-size: 14px;
+      flex-shrink: 0;
+    }
+    .header-nudge-text {
+      font-weight: 500;
+    }
+    .header-nudge-text strong {
+      font-weight: 700;
+      color: var(--pe-blue);
+    }
+    .header-nudge-arrow {
+      color: var(--pe-gray-400);
+      font-size: 10px;
+      flex-shrink: 0;
+    }
+
+    /* ── COMPOSE ZONE ────────────────────────────────── */
+    .compose-zone {
+      padding: var(--space-lg);
+      padding-top: var(--space-xl);
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      background: var(--pe-white);
+      margin: 0;
+    }
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+    .form-label {
+      font-size: var(--text-sm);
+      font-weight: 600;
+      color: var(--pe-navy);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      letter-spacing: 0.2px;
+    }
+    .form-input,
+    .form-textarea,
+    .form-select {
+      width: 100%;
+      padding: 9px var(--space-md);
+      border: 1.5px solid var(--pe-gray-200);
+      border-radius: var(--radius-lg);
+      font-family: var(--font-family);
+      font-size: var(--text-base);
+      color: var(--pe-navy);
+      background: var(--pe-white);
+      transition: border-color var(--transition-fast), box-shadow var(--transition-fast), background var(--transition-fast);
+      box-shadow: var(--shadow-xs);
+    }
+    .form-input::placeholder,
+    .form-textarea::placeholder {
+      color: var(--pe-gray-400);
+    }
+    .form-input:hover,
+    .form-textarea:hover {
+      border-color: var(--pe-gray-300);
+      background: var(--pe-gray-50);
+    }
+    .form-input:focus,
+    .form-textarea:focus,
+    .form-select:focus {
+      outline: none;
+      border-color: var(--pe-blue);
+      box-shadow: var(--shadow-blue);
+      background: var(--pe-white);
+    }
+    .form-textarea {
+      resize: vertical;
+      min-height: 60px;
+    }
+    .form-input-row {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .form-input-row .form-input,
+    .form-input-row .form-textarea {
+      flex: 1;
+    }
+
+    /* ── FIELDSET ──────────────────────────────────────── */
+    fieldset {
+      border: none;
+      margin: 0;
+      padding: 0;
+    }
+    fieldset legend {
+      padding: 0;
+      margin-bottom: 4px;
+    }
+
+    /* ── CHARACTER COUNTER ────────────────────────────── */
+    .char-counter {
+      font-size: var(--text-xs);
+      color: var(--pe-gray-400);
+      text-align: right;
+      font-variant-numeric: tabular-nums;
+      font-weight: 400;
+    }
+    .char-warning {
+      color: var(--pe-amber);
+      font-weight: 500;
+    }
+    .char-danger {
+      color: var(--pe-red);
+      font-weight: 600;
+    }
+
+    /* ── AI GENERATE BUTTON ─────────────────────────────── */
+    .btn-ai-generate {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      width: 100%;
+      padding: 8px var(--space-md);
+      border: 1.5px solid var(--pe-gold);
+      border-radius: var(--radius-lg);
+      background: linear-gradient(135deg, var(--pe-gold-light) 0%, var(--pe-gold) 100%);
+      color: var(--pe-navy);
+      font-size: var(--text-sm);
+      font-weight: 700;
+      cursor: pointer;
+      font-family: var(--font-family);
+      letter-spacing: 0.3px;
+      transition: all var(--transition-fast);
+      box-shadow: 0 1px 3px rgba(255, 211, 125, 0.3);
+    }
+    .btn-ai-generate:hover:not(:disabled) {
+      background: linear-gradient(135deg, var(--pe-gold) 0%, #FFC94D 100%);
+      border-color: #FFC94D;
+      box-shadow: 0 2px 8px rgba(255, 211, 125, 0.4);
+      transform: translateY(-1px);
+    }
+    .btn-ai-generate:active:not(:disabled) {
+      transform: translateY(0);
+      box-shadow: 0 1px 2px rgba(255, 211, 125, 0.3);
+    }
+    .btn-ai-generate:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+    .btn-ai-generate:focus-visible {
+      outline: 2px solid var(--pe-gold);
+      outline-offset: 1px;
+    }
+    .btn-ai-sm {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2px 8px;
+      border: 1px solid var(--pe-gold);
+      border-radius: var(--radius-sm);
+      background: var(--pe-gold-light);
+      color: var(--pe-navy);
+      font-size: 10px;
+      font-weight: 700;
+      font-family: var(--font-family);
+      cursor: pointer;
+      transition: all var(--transition-fast);
+      letter-spacing: 0.3px;
+    }
+    .btn-ai-sm:hover:not(:disabled) {
+      background: var(--pe-gold);
+    }
+    .btn-ai-sm:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+    .ai-suggestions {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      margin-top: 6px;
+    }
+    .ai-suggestion-chip {
+      display: block;
+      width: 100%;
+      padding: 10px var(--space-md);
+      border: 1.5px solid var(--pe-gold);
+      border-radius: var(--radius-lg);
+      background: linear-gradient(135deg, var(--pe-gold-light) 0%, var(--pe-white) 100%);
+      font-family: var(--font-family);
+      font-size: var(--text-sm);
+      color: var(--pe-navy);
+      cursor: pointer;
+      text-align: left;
+      transition: all var(--transition-fast);
+      line-height: 1.4;
+      position: relative;
+      box-shadow: 0 1px 4px rgba(255, 211, 125, 0.2);
+    }
+    .ai-suggestion-chip:hover {
+      border-color: #e6b84d;
+      box-shadow: 0 2px 8px rgba(255, 211, 125, 0.35);
+      background: linear-gradient(135deg, var(--pe-gold-light) 0%, #fff9ed 100%);
+    }
+    .ai-suggestion-chip .chip-label {
+      font-size: 10px;
+      font-weight: 700;
+      color: #b8860b;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      display: inline-block;
+      margin-bottom: 4px;
+      background: var(--pe-gold);
+      padding: 1px 6px;
+      border-radius: 3px;
+    }
+    .ai-suggestion-chip .chip-title {
+      display: block;
+      font-weight: 600;
+      margin-bottom: 2px;
+    }
+    .ai-suggestion-chip .chip-message {
+      display: block;
+      color: var(--pe-gray-600);
+      font-size: var(--text-xs);
+    }
+    .ai-suggestion-chip .chip-buttons {
+      display: block;
+      font-size: 11px;
+      color: var(--pe-blue);
+      margin-top: 4px;
+      font-weight: 600;
+    }
+    /* Social links quick-fill in Action Buttons */
+    .social-links-picker {
+      margin: 6px 0 8px;
+      padding: 8px;
+      background: var(--pe-gray-50);
+      border-radius: var(--radius-md);
+      border: 1px solid var(--pe-gray-200);
+    }
+    .social-links-picker .form-label-sm {
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+      color: var(--pe-gray-500);
+      margin-bottom: 4px;
+    }
+    .social-links-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+    }
+    .social-link-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 4px 8px;
+      border: 1px solid var(--pe-gray-200);
+      border-radius: var(--radius-sm);
+      background: var(--pe-white);
+      font-family: var(--font-family);
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--pe-navy);
+      cursor: pointer;
+      transition: all var(--transition-fast);
+    }
+    .social-link-btn:hover {
+      border-color: var(--pe-blue);
+      background: var(--pe-blue-light);
+      color: var(--pe-blue);
+    }
+    .social-link-btn .social-icon {
+      width: 14px;
+      height: 14px;
+      flex-shrink: 0;
+    }
+
+    .ai-panel {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-top: 8px;
+    }
+    .ai-controls {
+      display: flex;
+      gap: 6px;
+      align-items: center;
+    }
+    .ai-tone-select {
+      flex: 0 0 auto;
+      width: auto;
+      padding: 4px 8px;
+      font-size: var(--text-xs);
+    }
+    .ai-feedback-input {
+      flex: 1;
+      padding: 4px 8px;
+      font-size: var(--text-xs);
+    }
+    .ai-controls .btn {
+      flex-shrink: 0;
+      padding: 4px 10px;
+      font-size: var(--text-xs);
+    }
+
+    /* ── IMAGE PREVIEW ────────────────────────────────── */
+    .image-row {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-sm);
+    }
+    .image-row-top {
+      display: flex;
+      align-items: center;
+      gap: var(--space-md);
+    }
+    .image-preview {
+      position: relative;
+      border: 1.5px solid var(--pe-gray-200);
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      background: var(--pe-white);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: var(--shadow-xs);
+    }
+    .image-preview--icon {
+      width: 40px;
+      height: 40px;
+      flex-shrink: 0;
+      border-radius: var(--radius-sm);
+    }
+    .image-preview--featured {
+      width: 100%;
+      aspect-ratio: 360 / 180;
+      border-radius: var(--radius-md);
+      background: var(--pe-gray-50);
+      border: 1.5px dashed var(--pe-gray-200);
+    }
+    .image-preview--featured:hover {
+      border-color: var(--pe-gray-300);
+    }
+    .image-preview img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .image-preview-placeholder {
+      font-size: var(--text-xs);
+      color: var(--pe-gray-400);
+      text-align: center;
+      padding: var(--space-md);
+      font-weight: 500;
+    }
+    .image-actions {
+      display: flex;
+      align-items: center;
+      gap: var(--space-md);
+      font-size: var(--text-xs);
+    }
+    .image-actions button {
+      border: none;
+      background: none;
+      font-family: var(--font-family);
+      font-size: var(--text-xs);
+      color: var(--pe-blue);
+      cursor: pointer;
+      padding: 2px 0;
+      text-align: left;
+      font-weight: 500;
+      transition: color var(--transition-fast);
+    }
+    .image-actions button:hover {
+      text-decoration: underline;
+      color: var(--pe-blue-hover);
+    }
+    .image-actions button:focus-visible {
+      outline: 2px solid var(--pe-blue);
+      outline-offset: 1px;
+    }
+    .image-actions button.danger {
+      color: var(--pe-red);
+    }
+    .image-actions button.danger:hover {
+      color: #DC2626;
+    }
+
+    /* ── ACCORDION ────────────────────────────────────── */
+    .accordion {
+      border-top: 1px solid var(--pe-gray-200);
+      background: var(--pe-white);
+    }
+    .accordion:last-child {
+      border-bottom: 1px solid var(--pe-gray-200);
+    }
+    .accordion-header {
+      display: flex;
+      align-items: center;
+      width: 100%;
+      padding: 14px var(--space-lg);
+      border: none;
+      background: none;
+      font-family: var(--font-family);
+      font-size: var(--text-base);
+      font-weight: 600;
+      color: var(--pe-navy);
+      cursor: pointer;
+      text-align: left;
+      gap: var(--space-sm);
+      transition: background var(--transition-fast);
+    }
+    .accordion-header:hover {
+      background: var(--pe-blue-light);
+    }
+    .accordion-header:focus-visible {
+      outline: 2px solid var(--pe-blue);
+      outline-offset: -2px;
+    }
+    .accordion-header .caret {
+      width: 12px;
+      height: 12px;
+      flex-shrink: 0;
+      transition: transform var(--transition-bounce);
+      color: var(--pe-blue);
+    }
+    .accordion-open .accordion-header .caret {
+      transform: rotate(180deg);
+    }
+    .accordion-open .accordion-header {
+      border-bottom: 1px solid var(--pe-gray-100);
+    }
+    .accordion-title {
+      flex: 1;
+    }
+    .accordion-summary {
+      font-size: var(--text-xs);
+      color: var(--pe-gray-400);
+      font-weight: 400;
+      margin-left: auto;
+      max-width: 140px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      background: var(--pe-gray-50);
+      padding: 2px 8px;
+      border-radius: 99px;
+    }
+    .accordion-lock {
+      width: 14px;
+      height: 14px;
+      color: var(--pe-gray-400);
+      flex-shrink: 0;
+      display: none;
+    }
+    .accordion[data-locked="true"] .accordion-lock {
+      display: block;
+    }
+    .accordion[data-locked="true"] .accordion-summary {
+      display: none;
+    }
+    .accordion[data-locked="true"] .accordion-header {
+      cursor: default;
+      opacity: 0.6;
+    }
+    .accordion[data-locked="true"] .accordion-header:hover {
+      background: none;
+    }
+    .accordion-body {
+      padding: var(--space-md) var(--space-lg) var(--space-lg);
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-md);
+      background: var(--pe-gray-50);
+    }
+
+    /* ── UPGRADE NUDGE ────────────────────────────────── */
+    .upgrade-nudge {
+      display: flex;
+      align-items: center;
+      gap: var(--space-sm);
+      padding: var(--space-sm) var(--space-md);
+      background: linear-gradient(135deg, var(--pe-gold-light) 0%, #FFF8E8 100%);
+      border: 1.5px solid var(--pe-gold);
+      border-radius: var(--radius-lg);
+      font-size: var(--text-xs);
+      color: var(--pe-navy);
+      box-shadow: 0 1px 3px rgba(255, 211, 125, 0.2);
+    }
+    .upgrade-nudge-text {
+      flex: 1;
+    }
+
+    /* ── SEGMENT LIST ─────────────────────────────────── */
+    .segment-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-xs);
+      max-height: 160px;
+      overflow-y: auto;
+    }
+    .segment-item {
+      display: flex;
+      align-items: center;
+      gap: var(--space-sm);
+      padding: 6px var(--space-sm);
+      border-radius: var(--radius-md);
+      font-size: var(--text-sm);
+      transition: background var(--transition-fast);
+    }
+    .segment-item:hover {
+      background: var(--pe-blue-light);
+    }
+    .segment-item input[type="checkbox"] {
+      accent-color: var(--pe-blue);
+      width: 14px;
+      height: 14px;
+      flex-shrink: 0;
+    }
+    .segment-item-label {
+      flex: 1;
+      color: var(--pe-navy);
+    }
+    .segment-item-count {
+      font-size: var(--text-xs);
+      color: var(--pe-gray-400);
+      font-variant-numeric: tabular-nums;
+    }
+    .segment-reach {
+      font-size: var(--text-xs);
+      color: var(--pe-gray-500);
+      padding: var(--space-xs) 0;
+    }
+    .segment-reach strong {
+      color: var(--pe-navy);
+    }
+
+    /* ── BUTTONS ──────────────────────────────────────── */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: var(--space-xs);
+      padding: 9px var(--space-lg);
+      border: 1.5px solid transparent;
+      border-radius: var(--radius-lg);
+      font-family: var(--font-family);
+      font-size: var(--text-sm);
+      font-weight: 600;
+      cursor: pointer;
+      transition: all var(--transition-fast);
+      white-space: nowrap;
+      letter-spacing: 0.2px;
+    }
+    .btn:focus-visible {
+      outline: 2px solid var(--pe-blue);
+      outline-offset: 1px;
+    }
+    .btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+    .btn-primary {
+      background: var(--pe-blue);
+      color: var(--pe-white);
+      border-color: var(--pe-blue);
+      box-shadow: 0 2px 4px rgba(59, 67, 255, 0.25);
+    }
+    .btn-primary:hover:not(:disabled) {
+      background: var(--pe-blue-hover);
+      border-color: var(--pe-blue-hover);
+      box-shadow: 0 4px 12px rgba(59, 67, 255, 0.35);
+      transform: translateY(-1px);
+    }
+    .btn-primary:active:not(:disabled) {
+      transform: translateY(0);
+      box-shadow: 0 1px 2px rgba(59, 67, 255, 0.25);
+    }
+    .btn-secondary {
+      background: var(--pe-white);
+      color: var(--pe-navy);
+      border-color: var(--pe-gray-300);
+    }
+    .btn-secondary:hover:not(:disabled) {
+      background: var(--pe-gray-50);
+      border-color: var(--pe-gray-400);
+    }
+    .btn-upgrade {
+      background: linear-gradient(135deg, var(--pe-gold) 0%, #FFC94D 100%);
+      color: var(--pe-navy);
+      border-color: var(--pe-gold);
+      font-weight: 700;
+      box-shadow: 0 1px 3px rgba(255, 211, 125, 0.3);
+    }
+    .btn-upgrade:hover:not(:disabled) {
+      background: #FFC94D;
+      border-color: #FFC94D;
+    }
+    .btn-sm {
+      padding: var(--space-xs) var(--space-sm);
+      font-size: var(--text-xs);
+    }
+    .btn-block {
+      width: 100%;
+    }
+    .btn-icon {
+      width: 28px;
+      height: 28px;
+      padding: 0;
+      border-radius: var(--radius-sm);
+    }
+    .btn-link {
+      background: none;
+      border: none;
+      color: var(--pe-blue);
+      font-family: var(--font-family);
+      font-size: var(--text-sm);
+      cursor: pointer;
+      padding: 0;
+    }
+    .btn-link:hover {
+      text-decoration: underline;
+    }
+
+    /* ── ACTION BAR ───────────────────────────────────── */
+    .action-bar {
+      position: sticky;
+      bottom: 0;
+      z-index: 90;
+      padding: var(--space-md) var(--space-lg);
+      background: var(--pe-white);
+      border-top: 1px solid var(--pe-gray-200);
+      box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.06);
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-sm);
+    }
+    .action-bar-row {
+      display: flex;
+      gap: var(--space-sm);
+    }
+    .action-bar-row .btn-primary {
+      flex: 1;
+      padding: 11px var(--space-lg);
+      font-size: var(--text-base);
+      font-weight: 700;
+      box-shadow: 0 3px 10px rgba(59, 67, 255, 0.3);
+      letter-spacing: 0.3px;
+    }
+    .action-bar-row .btn-primary:hover:not(:disabled) {
+      box-shadow: 0 5px 20px rgba(59, 67, 255, 0.4);
+    }
+    .action-bar-row .btn-secondary {
+      padding: 11px var(--space-lg);
+      font-size: var(--text-base);
+    }
+    .action-bar-link {
+      text-align: center;
+    }
+
+    /* ── LOGIN SCREEN ─────────────────────────────────── */
+    .login-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: var(--space-2xl) var(--space-lg);
+      padding-top: 40px;
+      gap: var(--space-lg);
+      background: var(--pe-white);
+      min-height: 100vh;
+    }
+    .login-logo {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: var(--space-sm);
+    }
+    .login-logo-text {
+      font-size: var(--text-xl);
+      font-weight: 700;
+      color: var(--pe-navy);
+    }
+    .login-logo-sub {
+      font-size: var(--text-sm);
+      color: var(--pe-gray-500);
+    }
+    .login-form {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-md);
+    }
+    .login-error {
+      padding: var(--space-sm) var(--space-md);
+      background: var(--pe-red-light);
+      border: 1px solid var(--pe-red);
+      border-radius: var(--radius-md);
+      font-size: var(--text-sm);
+      color: var(--pe-red);
+    }
+    .login-status {
+      display: flex;
+      align-items: center;
+      gap: var(--space-sm);
+      padding: var(--space-sm) var(--space-md);
+      background: var(--pe-blue-light, #EEF0FF);
+      border: 1px solid var(--pe-blue);
+      border-radius: var(--radius-md);
+      font-size: var(--text-sm);
+      color: var(--pe-navy);
+    }
+    .login-spinner {
+      width: 16px;
+      height: 16px;
+      border: 2px solid var(--pe-gray-300);
+      border-top-color: var(--pe-blue);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      flex-shrink: 0;
+    }
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    .login-hint {
+      text-align: center;
+      font-size: var(--text-xs);
+      color: var(--pe-gray-500);
+      margin: 0;
+    }
+    .login-divider {
+      display: flex;
+      align-items: center;
+      gap: var(--space-md);
+      color: var(--pe-gray-400);
+      font-size: var(--text-sm);
+    }
+    .login-divider::before,
+    .login-divider::after {
+      content: "";
+      flex: 1;
+      height: 1px;
+      background: var(--pe-gray-200);
+    }
+    .login-footer {
+      font-size: var(--text-sm);
+      color: var(--pe-gray-500);
+      text-align: center;
+    }
+    .login-footer a {
+      color: var(--pe-blue);
+      text-decoration: none;
+      font-weight: 500;
+    }
+    .login-footer a:hover {
+      text-decoration: underline;
+    }
+    .btn-google {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: var(--space-sm);
+      width: 100%;
+      padding: 10px var(--space-lg);
+      border: 1.5px solid var(--pe-gray-200);
+      border-radius: var(--radius-lg);
+      background: var(--pe-white);
+      font-family: var(--font-family);
+      font-size: var(--text-sm);
+      font-weight: 600;
+      color: var(--pe-navy);
+      cursor: pointer;
+      transition: all var(--transition-fast);
+      box-shadow: var(--shadow-xs);
+    }
+    .btn-google:hover {
+      background: var(--pe-gray-50);
+      border-color: var(--pe-gray-300);
+      box-shadow: var(--shadow-sm);
+    }
+    .btn-google:focus-visible {
+      outline: 2px solid var(--pe-blue);
+      outline-offset: 1px;
+    }
+    .btn-google svg {
+      width: 18px;
+      height: 18px;
+      flex-shrink: 0;
+    }
+
+    /* ── SITE PICKER ──────────────────────────────────── */
+    .site-picker {
+      padding: var(--space-2xl) var(--space-lg);
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-lg);
+      align-items: center;
+      text-align: center;
+    }
+    .site-picker-title {
+      font-size: var(--text-lg);
+      font-weight: 600;
+      color: var(--pe-navy);
+    }
+    .site-picker-list {
+      list-style: none;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-sm);
+    }
+    .site-picker-item {
+      display: flex;
+      align-items: center;
+      gap: var(--space-sm);
+      padding: var(--space-md);
+      border: 1.5px solid var(--pe-gray-200);
+      border-radius: var(--radius-lg);
+      background: var(--pe-white);
+      cursor: pointer;
+      width: 100%;
+      font-family: var(--font-family);
+      font-size: var(--text-base);
+      color: var(--pe-navy);
+      text-align: left;
+      transition: all var(--transition-fast);
+      box-shadow: var(--shadow-xs);
+    }
+    .site-picker-item:hover {
+      border-color: var(--pe-blue);
+      background: var(--pe-blue-light);
+      box-shadow: var(--shadow-blue);
+      transform: translateY(-1px);
+    }
+    .site-picker-item:focus-visible {
+      outline: 2px solid var(--pe-blue);
+      outline-offset: 1px;
+    }
+
+    /* ── INSIGHTS SCREEN ──────────────────────────────── */
+    .screen-header {
+      display: flex;
+      align-items: center;
+      gap: var(--space-sm);
+      padding: var(--space-md) var(--space-lg);
+      border-bottom: 1px solid var(--pe-gray-200);
+    }
+    .screen-header-title {
+      flex: 1;
+      font-size: var(--text-lg);
+      font-weight: 600;
+      color: var(--pe-navy);
+    }
+    .btn-back {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 28px;
+      height: 28px;
+      border: 1.5px solid var(--pe-gray-200);
+      border-radius: var(--radius-md);
+      background: var(--pe-white);
+      cursor: pointer;
+      color: var(--pe-navy);
+      flex-shrink: 0;
+      transition: all var(--transition-fast);
+    }
+    .btn-back:hover {
+      background: var(--pe-gray-50);
+      border-color: var(--pe-gray-300);
+    }
+    .btn-back:focus-visible {
+      outline: 2px solid var(--pe-blue);
+      outline-offset: 1px;
+    }
+    .btn-back svg {
+      width: 14px;
+      height: 14px;
+    }
+    .insight-section {
+      padding: var(--space-md) var(--space-lg);
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-sm);
+    }
+    .insight-section + .insight-section {
+      border-top: 1px solid var(--pe-gray-100);
+    }
+    .insight-section-title {
+      font-size: var(--text-sm);
+      font-weight: 600;
+      color: var(--pe-gray-600);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    /* ── Health Snapshot ────────────────────────────────── */
+    .health-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: var(--space-sm);
+    }
+    .health-card {
+      padding: var(--space-md) var(--space-sm);
+      background: var(--pe-gray-50);
+      border-radius: var(--radius-lg);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      cursor: pointer;
+      transition: all var(--transition-fast);
+      border: 1px solid var(--pe-gray-100);
+      text-align: center;
+    }
+    .health-card:hover {
+      border-color: var(--pe-blue);
+      background: var(--pe-blue-light);
+    }
+    .health-card-value {
+      font-size: var(--text-lg);
+      font-weight: 700;
+      color: var(--pe-navy);
+    }
+    .health-card-label {
+      font-size: 10px;
+      color: var(--pe-gray-500);
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+      font-weight: 500;
+    }
+    .health-card--opportunity .health-card-value {
+      font-size: var(--text-sm);
+      color: var(--pe-blue);
+      font-weight: 600;
+    }
+    .health-card--opportunity .health-card-label {
+      color: var(--pe-gray-400);
+    }
+
+    /* ── Recommendation Cards ──────────────────────────── */
+    .rec-card {
+      padding: 10px 12px;
+      background: var(--pe-white);
+      border-radius: var(--radius-md);
+      border: 1px solid var(--pe-gray-200);
+      border-left: 3px solid var(--pe-gray-300);
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      gap: 10px;
+      transition: box-shadow 0.15s ease;
+    }
+    .rec-card:hover {
+      box-shadow: 0 2px 8px rgba(25, 26, 53, 0.08);
+    }
+    .rec-card--high { border-left-color: var(--pe-blue); }
+    .rec-card--medium { border-left-color: var(--pe-gold); }
+    .rec-card--low { border-left-color: var(--pe-gray-300); }
+    #recommendations-container {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .rec-card-icon {
+      font-size: 20px;
+      line-height: 1;
+      flex-shrink: 0;
+      width: 24px;
+      text-align: center;
+    }
+    .rec-card-body {
+      flex: 1;
+      min-width: 0;
+    }
+    .rec-card-title {
+      font-size: var(--text-sm);
+      font-weight: 600;
+      color: var(--pe-navy);
+      line-height: 1.3;
+    }
+    .rec-card-desc {
+      font-size: 11px;
+      color: var(--pe-gray-500);
+      line-height: 1.3;
+      margin-top: 1px;
+    }
+    .rec-card .btn {
+      flex-shrink: 0;
+      white-space: nowrap;
+      font-size: 12px;
+      padding: 5px 12px;
+    }
+
+    /* ── SEGMENT MANAGER SCREEN ───────────────────────── */
+    .segment-mgr-section {
+      padding: var(--space-md) var(--space-lg);
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-md);
+    }
+    .segment-mgr-section + .segment-mgr-section {
+      border-top: 1px solid var(--pe-gray-100);
+    }
+    .segment-mgr-title {
+      font-size: var(--text-sm);
+      font-weight: 600;
+      color: var(--pe-navy);
+    }
+    .segment-mgr-url {
+      padding: var(--space-sm) var(--space-md);
+      background: var(--pe-gray-50);
+      border-radius: var(--radius-md);
+      font-size: var(--text-xs);
+      color: var(--pe-gray-600);
+      word-break: break-all;
+    }
+    .segment-mgr-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-xs);
+    }
+    .segment-mgr-item {
+      display: flex;
+      align-items: center;
+      gap: var(--space-sm);
+      padding: var(--space-sm) var(--space-md);
+      border: 1.5px solid var(--pe-gray-200);
+      border-radius: var(--radius-lg);
+      font-size: var(--text-sm);
+      background: var(--pe-white);
+      transition: border-color var(--transition-fast);
+    }
+    .segment-mgr-item:hover {
+      border-color: var(--pe-gray-300);
+    }
+    .segment-mgr-item-name {
+      flex: 1;
+      color: var(--pe-navy);
+    }
+
+    /* ── SETTINGS SCREEN ──────────────────────────────── */
+    .settings-section {
+      padding: var(--space-md) var(--space-lg);
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-md);
+    }
+    .toggle-switch {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      gap: var(--space-sm);
+    }
+    .toggle-switch input[type="checkbox"] {
+      appearance: none;
+      -webkit-appearance: none;
+      width: 36px;
+      height: 20px;
+      background: var(--pe-gray-300);
+      border-radius: 10px;
+      cursor: pointer;
+      position: relative;
+      transition: background 0.2s ease;
+      flex-shrink: 0;
+    }
+    .toggle-switch input[type="checkbox"]::after {
+      content: "";
+      position: absolute;
+      top: 2px;
+      left: 2px;
+      width: 16px;
+      height: 16px;
+      background: var(--pe-white);
+      border-radius: 50%;
+      transition: transform 0.2s ease;
+    }
+    .toggle-switch input[type="checkbox"]:checked {
+      background: var(--pe-blue);
+    }
+    .toggle-switch input[type="checkbox"]:checked::after {
+      transform: translateX(16px);
+    }
+    .toggle-switch input[type="checkbox"]:focus-visible {
+      outline: 2px solid var(--pe-blue);
+      outline-offset: 2px;
+    }
+    .toggle-label {
+      font-size: var(--text-sm);
+      color: var(--pe-navy);
+    }
+
+    /* ── MODAL ─────────────────────────────────────────── */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 300;
+      background: rgba(25, 26, 53, 0.6);
+      backdrop-filter: blur(4px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: var(--space-lg);
+    }
+    .modal-card {
+      background: var(--pe-white);
+      border-radius: var(--radius-xl);
+      box-shadow: 0 20px 40px rgba(25, 26, 53, 0.2);
+      width: 100%;
+      max-width: 360px;
+      overflow: hidden;
+    }
+    .modal-title {
+      padding: var(--space-lg) var(--space-lg) 0;
+      font-size: var(--text-lg);
+      font-weight: 600;
+      color: var(--pe-navy);
+    }
+    .modal-body {
+      padding: var(--space-md) var(--space-lg);
+      font-size: var(--text-sm);
+      color: var(--pe-gray-600);
+    }
+    .modal-actions {
+      display: flex;
+      gap: var(--space-sm);
+      padding: 0 var(--space-lg) var(--space-lg);
+      justify-content: flex-end;
+    }
+
+    /* ── TOAST ─────────────────────────────────────────── */
+    .toast {
+      position: fixed;
+      bottom: var(--space-lg);
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 400;
+      padding: var(--space-sm) var(--space-xl);
+      border-radius: 99px;
+      font-size: var(--text-sm);
+      font-weight: 600;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+      transition: opacity 0.2s ease, transform 0.2s ease;
+    }
+    .toast--success {
+      background: var(--pe-green);
+      color: var(--pe-white);
+    }
+    .toast--error {
+      background: var(--pe-red);
+      color: var(--pe-white);
+    }
+
+    /* ── LOADING SPINNER ──────────────────────────────── */
+    .loading-spinner {
+      display: inline-block;
+      width: 20px;
+      height: 20px;
+      border: 2px solid var(--pe-gray-200);
+      border-top-color: var(--pe-blue);
+      border-radius: 50%;
+      animation: spin 0.6s linear infinite;
+    }
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    .loading-overlay {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: var(--space-2xl);
+    }
+
+    /* ── INLINE CREATE SEGMENT FORM ───────────────────── */
+    .inline-form {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-sm);
+      padding: var(--space-md);
+      background: var(--pe-white);
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--pe-gray-200);
+      margin-top: var(--space-sm);
+    }
+    .inline-form-row {
+      display: flex;
+      gap: var(--space-sm);
+      align-items: center;
+    }
+    .inline-form-row .form-input {
+      flex: 1;
+    }
+
+    /* ── UTILITY ──────────────────────────────────────── */
+    .text-center {
+      text-align: center;
+    }
+    .text-danger {
+      color: var(--pe-red);
+    }
+    .form-hint {
+      font-weight: 400;
+      color: var(--pe-gray-500);
+      font-size: var(--text-xs);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ============================================== -->
+  <!-- SCREEN: LOGIN                                  -->
+  <!-- ============================================== -->
+  <section id="screen-login" class="screen" aria-label="Login">
+    <div class="login-container">
+      <!-- Logo -->
+      <div class="login-logo">
+        <svg width="180" height="37" viewBox="0 0 403 83" fill="none" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
+          <path d="M64.2128 36.2977C64.1277 44.2977 61.7447 50.6807 56.9788 56.1275C56.1277 57.1488 55.1064 58.0849 54.0852 58.936C53.149 59.7871 51.7873 59.7871 51.0213 58.936C50.2554 57.9998 50.4256 56.7232 51.4469 55.8722C53.5745 54.0849 55.2766 52.0424 56.6384 49.6594C58.6809 46.1701 59.8724 42.4254 60.0426 38.3403C60.383 31.2764 58.1703 25.2339 53.4894 20.0424C52.8086 19.3615 52.0426 18.6807 51.3618 17.9998C50.4256 17.1488 50.2554 15.7871 51.0213 14.936C51.7873 13.9998 53.0639 13.9998 54.0852 14.936C59.532 19.6169 62.766 25.5743 63.9575 32.6381C64.1277 34.0849 64.1277 35.5318 64.2128 36.2977Z" fill="#3B43FF"/>
+          <path d="M6.25537 36.9786C6.42558 28.1275 9.74473 20.7232 16.4681 14.8509C17.4043 13.9998 18.766 14.085 19.4469 14.936C20.2128 15.7871 20.0426 17.1488 19.1064 17.9147C14.5107 21.9147 11.6171 26.8509 10.6809 32.8935C9.40431 40.8084 11.532 47.7871 16.8937 53.7445C17.5745 54.5105 18.4256 55.2764 19.1915 55.9573C20.1277 56.8084 20.2128 58.0849 19.4469 58.936C18.6809 59.7871 17.4043 59.7871 16.4681 59.0211C10.5107 53.9147 7.10643 47.3615 6.42558 39.5318C6.42558 39.1062 6.34048 38.6807 6.34048 38.2552C6.25537 37.8296 6.25537 37.4041 6.25537 36.9786Z" fill="#3B43FF"/>
+          <path d="M14.5107 36.8935C14.6809 30.5956 16.9788 25.319 21.8298 21.1488C22.8511 20.2977 23.9575 20.3828 24.8086 21.319C25.5745 22.1701 25.4894 23.2764 24.4681 24.2126C22.1703 26.3403 20.2979 28.8084 19.3618 31.8722C17.5745 38.0849 18.8511 43.6169 23.2766 48.3828C23.7022 48.8935 24.2128 49.319 24.6384 49.8296C25.4043 50.5956 25.4894 51.7871 24.8086 52.553C24.1277 53.4041 22.766 53.5743 22.0001 52.8084C20.7235 51.6169 19.532 50.4254 18.4256 49.0637C16.1277 45.9998 14.8511 42.5105 14.5958 38.5956C14.5958 38.3403 14.5107 38.0849 14.5107 37.7445C14.5107 37.4892 14.5107 37.2339 14.5107 36.8935Z" fill="#3B43FF"/>
+          <path d="M55.9575 36.9786C55.7873 43.1062 53.4894 48.2977 48.8937 52.4679C48.2128 53.1488 47.3618 53.4892 46.4256 53.1488C45.0639 52.553 44.7235 51.0211 45.7447 49.8296C46.9362 48.4679 48.2979 47.1913 49.3192 45.6594C53.4043 39.3615 52.4681 30.7658 47.1064 25.4041C46.6809 24.9786 46.2554 24.553 45.8298 24.1275C45.0639 23.3615 44.9788 22.1701 45.6596 21.4041C46.4256 20.553 47.6171 20.3828 48.5532 21.0637C50.2554 22.4254 51.7022 24.0424 52.8086 25.9147C54.5958 28.8084 55.7022 31.9573 55.8724 35.3615C55.8724 35.8722 55.8724 36.3828 55.9575 36.9786Z" fill="#3B43FF"/>
+          <path d="M47.532 36.4679C47.532 40.7232 46.0852 43.702 43.3618 46.2552C42.4256 47.1913 41.0639 47.1913 40.2979 46.2552C39.532 45.4041 39.532 44.1275 40.5532 43.2764C42.2554 41.6594 43.3618 39.702 43.4469 37.319C43.532 35.0211 42.8511 33.0637 41.3192 31.3615C41.0639 31.0211 40.7235 30.7658 40.4681 30.5105C39.6171 29.6594 39.532 28.4679 40.2979 27.6169C41.0639 26.7658 42.3405 26.6807 43.2766 27.5318C44.7235 28.8084 45.8298 30.3403 46.5958 32.1275C47.2766 33.6594 47.6171 35.2764 47.532 36.4679Z" fill="#3B43FF"/>
+          <path d="M28.2979 26.936C29.4894 26.936 30.0852 27.3615 30.5107 28.2126C30.9362 29.0637 30.6809 29.9147 30.0001 30.5105C28.8937 31.6169 27.9575 32.7232 27.4469 34.2552C26.4256 37.4892 27.1064 40.2977 29.3192 42.7658C29.4894 43.0211 29.7447 43.1913 30.0001 43.4467C30.8511 44.3828 30.9362 45.5743 30.0852 46.4254C29.3192 47.1913 28.0426 47.2764 27.1915 46.5105C25.0639 44.6381 23.6171 42.4254 23.1915 39.6169C22.3405 35.0211 23.6171 31.0211 27.0213 27.8722C27.4469 27.2764 28.0426 27.1062 28.2979 26.936Z" fill="#3B43FF"/>
+          <path d="M35.1064 40.9786C32.8086 40.9786 31.0213 39.1913 31.0213 36.8935C31.0213 34.5956 32.8937 32.8084 35.1915 32.8084C37.4894 32.8084 39.2766 34.5956 39.2766 36.8935C39.2766 39.2764 37.4894 40.9786 35.1064 40.9786Z" fill="#3B43FF"/>
+          <path d="M78.3848 57.6597H87.6375V42.892C88.4954 43.0146 89.5984 43.0759 90.8239 43.0759C96.3388 43.0759 101.057 41.7278 104.243 38.7252C106.695 36.3967 108.043 32.9652 108.043 28.921C108.043 24.8767 106.266 21.4452 103.631 19.3618C100.873 17.1559 96.7677 16.0529 91.0077 16.0529C85.309 16.0529 81.2648 16.4206 78.3848 16.9108V57.6597ZM87.6375 23.4674C88.3116 23.2835 89.5984 23.0997 91.498 23.0997C96.155 23.0997 98.7899 25.3669 98.7899 29.1661C98.7899 33.3942 95.726 35.9065 90.7626 35.9065C89.4146 35.9065 88.4341 35.8452 87.6375 35.6614V23.4674Z" fill="#191A35"/>
+          <path d="M140.108 27.6954H130.733V45.5269C130.733 46.2623 130.671 46.9976 130.426 47.5491C129.814 49.0197 128.343 50.7967 125.769 50.7967C122.522 50.7967 121.112 48.1618 121.112 43.8112V27.6954H111.737V45.2818C111.737 54.5346 116.21 58.3337 122.277 58.3337C127.669 58.3337 130.488 55.2699 131.652 53.4316H131.836L132.265 57.6597H140.353C140.231 55.1474 140.108 51.961 140.108 48.0393V27.6954Z" fill="#191A35"/>
+          <path d="M144.643 56.1891C146.91 57.4146 150.403 58.2725 154.325 58.2725C162.903 58.2725 167.315 54.1669 167.315 48.5908C167.254 44.1789 164.864 41.2989 159.166 39.338C155.489 38.0512 154.325 37.3159 154.325 35.9065C154.325 34.3746 155.611 33.4554 157.879 33.4554C160.452 33.4554 163.026 34.4359 164.374 35.1712L166.028 28.7371C164.19 27.818 161.065 27.0214 157.572 27.0214C150.158 27.0214 145.378 31.2495 145.378 36.8257C145.317 40.3797 147.707 43.7499 153.896 45.8333C157.388 46.9976 158.308 47.7329 158.308 49.2648C158.308 50.7967 157.143 51.7772 154.325 51.7772C151.567 51.7772 148.013 50.5516 146.297 49.5099L144.643 56.1891Z" fill="#191A35"/>
+          <path d="M171.702 57.6597H181.016V39.8895C181.016 39.2154 181.078 38.4189 181.323 37.8061C181.997 36.1516 183.529 34.5584 185.98 34.5584C189.473 34.5584 190.821 37.2546 190.821 41.1763V57.6597H200.135V40.1346C200.135 31.1269 195.6 27.0214 189.656 27.0214C187.941 27.0214 186.164 27.4503 184.816 28.1857C183.345 28.9823 182.119 29.9627 181.139 31.2495H181.016V14.1533H171.702V57.6597Z" fill="#191A35"/>
+          <path d="M231.259 32.5976H216.063V24.0189H232.178V16.3593H206.687V57.6597H233.036V50.0001H216.063V40.1959H231.259V32.5976Z" fill="#191A35"/>
+          <path d="M237.888 57.6597H247.202V40.3797C247.202 39.5218 247.325 38.6027 247.57 38.0512C248.183 36.3354 249.715 34.5584 252.288 34.5584C255.658 34.5584 257.007 37.1933 257.007 41.0537V57.6597H266.321V39.8895C266.321 31.0657 261.725 27.0214 255.597 27.0214C250.634 27.0214 247.57 29.9014 246.344 31.801H246.161L245.732 27.6954H237.643C237.766 30.3303 237.888 33.5167 237.888 37.2546V57.6597Z" fill="#191A35"/>
+          <path d="M293.095 27.6954L292.788 31.2495H292.666C291.134 28.7984 288.56 27.0214 284.455 27.0214C277.101 27.0214 270.851 33.1491 270.851 42.7695C270.851 51.4095 276.121 57.4146 283.535 57.4146C286.967 57.4146 289.847 56.0052 291.624 53.4929H291.747V55.4537C291.747 60.9686 288.376 63.3584 283.964 63.3584C280.472 63.3584 277.163 62.1942 275.263 61.0912L273.425 68.138C276.121 69.6699 280.288 70.4665 284.21 70.4665C288.621 70.4665 293.095 69.6086 296.404 66.7899C299.774 63.7874 300.938 59.0691 300.938 53.3091V36.5806C300.938 32.1074 301.061 29.595 301.183 27.6954H293.095ZM291.624 44.3014C291.624 45.098 291.563 46.0784 291.318 46.7525C290.705 48.9584 288.805 50.5516 286.415 50.5516C282.494 50.5516 280.288 47.0589 280.288 42.5857C280.288 37.132 283.045 34.0682 286.415 34.0682C288.989 34.0682 290.766 35.7227 291.44 38.1737C291.563 38.664 291.624 39.2767 291.624 39.8895V44.3014Z" fill="#191A35"/>
+          <path d="M332.616 57.6597C332.309 56.0052 332.187 53.2478 332.187 50.3678V39.9508C332.187 32.904 329 27.0214 319.012 27.0214C313.559 27.0214 309.453 28.492 307.37 29.6563L309.085 35.6614C311.046 34.4359 314.294 33.3942 317.358 33.3942C321.953 33.3942 322.811 35.6614 322.811 37.2546V37.6835C312.211 37.6223 305.225 41.3601 305.225 49.1423C305.225 53.9218 308.84 58.3337 314.907 58.3337C318.461 58.3337 321.525 57.0469 323.485 54.6572H323.669L324.221 57.6597H332.616ZM323.118 46.7525C323.118 47.304 323.056 47.8554 322.934 48.3457C322.321 50.2452 320.422 51.7772 318.093 51.7772C316.01 51.7772 314.416 50.6129 314.416 48.2231C314.416 44.6078 318.216 43.4435 323.118 43.5048V46.7525Z" fill="#191A35"/>
+          <path d="M358.862 27.6954L358.555 31.2495H358.433C356.901 28.7984 354.327 27.0214 350.222 27.0214C342.868 27.0214 336.618 33.1491 336.618 42.7695C336.618 51.4095 341.888 57.4146 349.302 57.4146C352.734 57.4146 355.614 56.0052 357.391 53.4929H357.514V55.4537C357.514 60.9686 354.143 63.3584 349.731 63.3584C346.239 63.3584 342.93 62.1942 341.03 61.0912L339.192 68.138C341.888 69.6699 346.055 70.4665 349.977 70.4665C354.388 70.4665 358.862 69.6086 362.171 66.7899C365.541 63.7874 366.705 59.0691 366.705 53.3091V36.5806C366.705 32.1074 366.828 29.595 366.95 27.6954H358.862ZM357.391 44.3014C357.391 45.098 357.33 46.0784 357.085 46.7525C356.472 48.9584 354.572 50.5516 352.182 50.5516C348.261 50.5516 346.055 47.0589 346.055 42.5857C346.055 37.132 348.812 34.0682 352.182 34.0682C354.756 34.0682 356.533 35.7227 357.207 38.1737C357.33 38.664 357.391 39.2767 357.391 39.8895V44.3014Z" fill="#191A35"/>
+          <path d="M399.424 45.6495C399.547 44.9754 399.731 43.5661 399.731 41.9729C399.731 34.5584 396.054 27.0214 386.372 27.0214C375.955 27.0214 371.237 35.4163 371.237 43.0146C371.237 52.3899 377.058 58.2725 387.23 58.2725C391.275 58.2725 395.012 57.6597 398.076 56.4342L396.851 50.1227C394.338 50.9193 391.765 51.3482 388.578 51.3482C384.228 51.3482 380.429 49.5099 380.122 45.6495H399.424ZM380.061 39.2767C380.306 36.7644 381.899 33.2103 385.821 33.2103C390.11 33.2103 391.091 37.0095 391.091 39.2767H380.061Z" fill="#191A35"/>
+        </svg>
+      </div>
+
+      <!-- Login actions -->
+      <div class="login-form" role="group" aria-label="Login options">
+        <!-- Error/status message -->
+        <div id="login-error" class="login-error hidden" role="alert" aria-live="polite"></div>
+
+        <!-- Status message shown while waiting for dashboard login -->
+        <div id="login-status" class="login-status hidden" role="status" aria-live="polite">
+          <div class="login-spinner" aria-hidden="true"></div>
+          <span>Waiting for login... Complete sign-in in the opened tab.</span>
+        </div>
+
+        <button type="button" class="btn btn-primary btn-block" id="btn-login-dashboard">
+          <svg width="16" height="16" viewBox="0 10 70 60" fill="none" aria-hidden="true" style="vertical-align: -2px; margin-right: 6px;">
+            <path d="M35.1064 40.9786C32.8086 40.9786 31.0213 39.1913 31.0213 36.8935C31.0213 34.5956 32.8937 32.8084 35.1915 32.8084C37.4894 32.8084 39.2766 34.5956 39.2766 36.8935C39.2766 39.2764 37.4894 40.9786 35.1064 40.9786Z" fill="currentColor"/>
+            <path d="M47.532 36.4679C47.532 40.7232 46.0852 43.702 43.3618 46.2552C42.4256 47.1913 41.0639 47.1913 40.2979 46.2552C39.532 45.4041 39.532 44.1275 40.5532 43.2764C42.2554 41.6594 43.3618 39.702 43.4469 37.319C43.532 35.0211 42.8511 33.0637 41.3192 31.3615C41.0639 31.0211 40.7235 30.7658 40.4681 30.5105C39.6171 29.6594 39.532 28.4679 40.2979 27.6169C41.0639 26.7658 42.3405 26.6807 43.2766 27.5318C44.7235 28.8084 45.8298 30.3403 46.5958 32.1275C47.2766 33.6594 47.6171 35.2764 47.532 36.4679Z" fill="currentColor"/>
+            <path d="M28.2979 26.936C29.4894 26.936 30.0852 27.3615 30.5107 28.2126C30.9362 29.0637 30.6809 29.9147 30.0001 30.5105C28.8937 31.6169 27.9575 32.7232 27.4469 34.2552C26.4256 37.4892 27.1064 40.2977 29.3192 42.7658C29.4894 43.0211 29.7447 43.1913 30.0001 43.4467C30.8511 44.3828 30.9362 45.5743 30.0852 46.4254C29.3192 47.1913 28.0426 47.2764 27.1915 46.5105C25.0639 44.6381 23.6171 42.4254 23.1915 39.6169C22.3405 35.0211 23.6171 31.0211 27.0213 27.8722C27.4469 27.2764 28.0426 27.1062 28.2979 26.936Z" fill="currentColor"/>
+          </svg>
+          Log in with PushEngage
+        </button>
+
+        <p class="login-hint">Opens the PushEngage dashboard to sign in securely.</p>
+      </div>
+
+      <!-- Footer -->
+      <p class="login-footer" id="login-signup-footer">
+        Don't have an account?
+        <a href="https://www.pushengage.com/pricing/?utm_source=extension&utm_medium=Signup-extension&utm_campaign=Extention-signup" target="_blank" rel="noopener noreferrer" id="link-signup">Sign up</a>
+      </p>
+    </div>
+  </section>
+
+
+  <!-- ============================================== -->
+  <!-- SCREEN: COMPOSE (main)                         -->
+  <!-- ============================================== -->
+  <section id="screen-compose" class="screen hidden" aria-label="Compose Campaign">
+
+    <!-- ── Header ──────────────────────────────────── -->
+    <header class="header" role="banner">
+      <!-- Left: Logo -->
+      <div class="header-logo" aria-label="PushEngage">
+        <!-- PushEngage signal icon -->
+        <svg width="28" height="28" viewBox="0 10 70 60" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M64.2128 36.2977C64.1277 44.2977 61.7447 50.6807 56.9788 56.1275C56.1277 57.1488 55.1064 58.0849 54.0852 58.936C53.149 59.7871 51.7873 59.7871 51.0213 58.936C50.2554 57.9998 50.4256 56.7232 51.4469 55.8722C53.5745 54.0849 55.2766 52.0424 56.6384 49.6594C58.6809 46.1701 59.8724 42.4254 60.0426 38.3403C60.383 31.2764 58.1703 25.2339 53.4894 20.0424C52.8086 19.3615 52.0426 18.6807 51.3618 17.9998C50.4256 17.1488 50.2554 15.7871 51.0213 14.936C51.7873 13.9998 53.0639 13.9998 54.0852 14.936C59.532 19.6169 62.766 25.5743 63.9575 32.6381C64.1277 34.0849 64.1277 35.5318 64.2128 36.2977Z" fill="#3B43FF"/>
+          <path d="M6.25537 36.9786C6.42558 28.1275 9.74473 20.7232 16.4681 14.8509C17.4043 13.9998 18.766 14.085 19.4469 14.936C20.2128 15.7871 20.0426 17.1488 19.1064 17.9147C14.5107 21.9147 11.6171 26.8509 10.6809 32.8935C9.40431 40.8084 11.532 47.7871 16.8937 53.7445C17.5745 54.5105 18.4256 55.2764 19.1915 55.9573C20.1277 56.8084 20.2128 58.0849 19.4469 58.936C18.6809 59.7871 17.4043 59.7871 16.4681 59.0211C10.5107 53.9147 7.10643 47.3615 6.42558 39.5318C6.42558 39.1062 6.34048 38.6807 6.34048 38.2552C6.25537 37.8296 6.25537 37.4041 6.25537 36.9786Z" fill="#3B43FF"/>
+          <path d="M14.5107 36.8935C14.6809 30.5956 16.9788 25.319 21.8298 21.1488C22.8511 20.2977 23.9575 20.3828 24.8086 21.319C25.5745 22.1701 25.4894 23.2764 24.4681 24.2126C22.1703 26.3403 20.2979 28.8084 19.3618 31.8722C17.5745 38.0849 18.8511 43.6169 23.2766 48.3828C23.7022 48.8935 24.2128 49.319 24.6384 49.8296C25.4043 50.5956 25.4894 51.7871 24.8086 52.553C24.1277 53.4041 22.766 53.5743 22.0001 52.8084C20.7235 51.6169 19.532 50.4254 18.4256 49.0637C16.1277 45.9998 14.8511 42.5105 14.5958 38.5956C14.5958 38.3403 14.5107 38.0849 14.5107 37.7445C14.5107 37.4892 14.5107 37.2339 14.5107 36.8935Z" fill="#3B43FF"/>
+          <path d="M55.9575 36.9786C55.7873 43.1062 53.4894 48.2977 48.8937 52.4679C48.2128 53.1488 47.3618 53.4892 46.4256 53.1488C45.0639 52.553 44.7235 51.0211 45.7447 49.8296C46.9362 48.4679 48.2979 47.1913 49.3192 45.6594C53.4043 39.3615 52.4681 30.7658 47.1064 25.4041C46.6809 24.9786 46.2554 24.553 45.8298 24.1275C45.0639 23.3615 44.9788 22.1701 45.6596 21.4041C46.4256 20.553 47.6171 20.3828 48.5532 21.0637C50.2554 22.4254 51.7022 24.0424 52.8086 25.9147C54.5958 28.8084 55.7022 31.9573 55.8724 35.3615C55.8724 35.8722 55.8724 36.3828 55.9575 36.9786Z" fill="#3B43FF"/>
+          <path d="M47.532 36.4679C47.532 40.7232 46.0852 43.702 43.3618 46.2552C42.4256 47.1913 41.0639 47.1913 40.2979 46.2552C39.532 45.4041 39.532 44.1275 40.5532 43.2764C42.2554 41.6594 43.3618 39.702 43.4469 37.319C43.532 35.0211 42.8511 33.0637 41.3192 31.3615C41.0639 31.0211 40.7235 30.7658 40.4681 30.5105C39.6171 29.6594 39.532 28.4679 40.2979 27.6169C41.0639 26.7658 42.3405 26.6807 43.2766 27.5318C44.7235 28.8084 45.8298 30.3403 46.5958 32.1275C47.2766 33.6594 47.6171 35.2764 47.532 36.4679Z" fill="#3B43FF"/>
+          <path d="M28.2979 26.936C29.4894 26.936 30.0852 27.3615 30.5107 28.2126C30.9362 29.0637 30.6809 29.9147 30.0001 30.5105C28.8937 31.6169 27.9575 32.7232 27.4469 34.2552C26.4256 37.4892 27.1064 40.2977 29.3192 42.7658C29.4894 43.0211 29.7447 43.1913 30.0001 43.4467C30.8511 44.3828 30.9362 45.5743 30.0852 46.4254C29.3192 47.1913 28.0426 47.2764 27.1915 46.5105C25.0639 44.6381 23.6171 42.4254 23.1915 39.6169C22.3405 35.0211 23.6171 31.0211 27.0213 27.8722C27.4469 27.2764 28.0426 27.1062 28.2979 26.936Z" fill="#3B43FF"/>
+          <path d="M35.1064 40.9786C32.8086 40.9786 31.0213 39.1913 31.0213 36.8935C31.0213 34.5956 32.8937 32.8084 35.1915 32.8084C37.4894 32.8084 39.2766 34.5956 39.2766 36.8935C39.2766 39.2764 37.4894 40.9786 35.1064 40.9786Z" fill="#3B43FF"/>
+        </svg>
+      </div>
+
+      <!-- Center: Site Selector -->
+      <div class="header-center">
+        <div class="dropdown" id="site-dropdown" aria-expanded="false">
+          <button
+            class="dropdown-trigger"
+            id="btn-site-selector"
+            type="button"
+            aria-haspopup="listbox"
+            aria-expanded="false"
+            aria-controls="site-dropdown-panel"
+            aria-label="Select site"
+          >
+            <span id="site-selector-label">Select a site</span>
+            <svg class="caret" viewBox="0 0 10 6" fill="none" aria-hidden="true">
+              <path d="M1 1l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </button>
+          <div
+            class="dropdown-panel hidden"
+            id="site-dropdown-panel"
+            role="listbox"
+            aria-label="Available sites"
+          >
+            <!-- Sites populated by JS -->
+            <div class="dropdown-divider" role="separator"></div>
+            <button class="dropdown-link" id="btn-add-site" type="button" role="option">
+              + Add Site
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right: User Menu -->
+      <div class="header-right">
+        <div class="dropdown" id="user-dropdown" aria-expanded="false">
+          <button
+            class="avatar-btn"
+            id="btn-user-menu"
+            type="button"
+            aria-haspopup="menu"
+            aria-expanded="false"
+            aria-controls="user-menu-panel"
+            aria-label="User menu"
+          >
+            <span id="user-avatar-letter" aria-hidden="true">U</span>
+          </button>
+          <div
+            class="dropdown-panel user-menu-panel hidden"
+            id="user-menu-panel"
+            role="menu"
+            aria-label="User menu"
+          >
+            <div class="dropdown-label" id="user-menu-email">user@example.com</div>
+            <div class="dropdown-label" id="user-menu-site">example.com</div>
+            <div class="dropdown-divider" role="separator"></div>
+            <a
+              class="dropdown-item"
+              id="link-dashboard"
+              href="https://app.pushengage.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              role="menuitem"
+            >
+              Your Dashboard
+            </a>
+            <button class="dropdown-item" id="btn-nav-insights" type="button" role="menuitem">
+              Insights
+            </button>
+            <button class="dropdown-item" id="btn-nav-segments" type="button" role="menuitem">
+              Segment Manager
+            </button>
+            <button class="dropdown-item" id="btn-nav-settings" type="button" role="menuitem">
+              Settings
+            </button>
+            <div class="dropdown-divider" role="separator"></div>
+            <button class="dropdown-item dropdown-item--danger" id="btn-logout" type="button" role="menuitem">
+              Logout
+            </button>
+            <div class="dropdown-divider" role="separator"></div>
+            <span class="dropdown-item dropdown-item--muted" role="menuitem" aria-disabled="true">
+              v2.0.0
+            </span>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- ── Header Nudge ─────────────────────────────── -->
+    <button
+      class="header-nudge"
+      id="btn-header-nudge"
+      type="button"
+      aria-label="Account insight. Click for action."
+    >
+      <span class="header-nudge-icon" id="header-nudge-icon" aria-hidden="true"></span>
+      <span class="header-nudge-text" id="header-nudge-text">
+        <strong id="header-nudge-highlight"></strong>
+        <span id="header-nudge-message"></span>
+      </span>
+      <span class="header-nudge-arrow" aria-hidden="true">›</span>
+    </button>
+
+    <!-- ── Scrollable Content ──────────────────────── -->
+    <div class="screen-scroll">
+
+      <!-- ── Compose Zone ──────────────────────────── -->
+      <div class="compose-zone">
+
+        <!-- Title -->
+        <div class="form-group">
+          <label class="form-label" for="campaign-title">
+            Title
+            <span class="char-counter" id="title-counter" aria-live="polite">0 / 85</span>
+          </label>
+          <input
+            id="campaign-title"
+            class="form-input"
+            type="text"
+            maxlength="85"
+            placeholder="Notification title"
+            aria-describedby="title-counter"
+          >
+        </div>
+
+        <!-- Message -->
+        <div class="form-group">
+          <label class="form-label" for="campaign-message">
+            Message
+            <span class="char-counter" id="message-counter" aria-live="polite">0 / 135</span>
+          </label>
+          <textarea
+            id="campaign-message"
+            class="form-textarea"
+            maxlength="135"
+            rows="3"
+            placeholder="Notification body text"
+            aria-describedby="message-counter"
+          ></textarea>
+        </div>
+
+        <!-- AI Generate (fills both title + message) -->
+        <button
+          class="btn-ai-generate"
+          type="button"
+          id="btn-ai-generate"
+          aria-label="Generate title and message with AI"
+          title="AI-generate title &amp; message from page content"
+        >
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path d="M12 2L14.09 8.26L20 9.27L15.55 13.97L16.91 20L12 16.9L7.09 20L8.45 13.97L4 9.27L9.91 8.26L12 2Z" fill="currentColor"/>
+          </svg>
+          AI Write
+        </button>
+
+        <!-- URL -->
+        <div class="form-group">
+          <label class="form-label" for="campaign-url">URL</label>
+          <input
+            id="campaign-url"
+            class="form-input"
+            type="url"
+            placeholder="https://example.com/page"
+            aria-label="Campaign destination URL"
+          >
+        </div>
+
+        <!-- Images -->
+        <div class="form-group">
+          <span class="form-label">Images</span>
+          <div class="image-row">
+            <div class="image-row-top">
+              <div class="image-preview image-preview--icon" aria-label="Notification icon">
+                <span class="image-preview-placeholder" id="icon-placeholder">Icon</span>
+                <img id="icon-preview-img" class="hidden" alt="Notification icon preview">
+              </div>
+              <span style="font-size:var(--text-xs);color:var(--pe-gray-400)">Site icon (from settings)</span>
+            </div>
+            <div class="image-preview image-preview--featured" aria-label="Featured image">
+              <span class="image-preview-placeholder" id="featured-placeholder">Featured Image</span>
+              <img id="featured-preview-img" class="hidden" alt="Featured image preview">
+            </div>
+            <div class="image-actions">
+              <button type="button" id="btn-change-featured" aria-label="Change featured image">Change Image</button>
+              <button type="button" id="btn-remove-featured" class="danger" aria-label="Remove featured image">Remove</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── Accordion: Segments ───────────────────── -->
+      <div class="accordion" id="accordion-segments" data-accordion="segments" aria-expanded="false">
+        <button
+          class="accordion-header"
+          type="button"
+          id="btn-accordion-segments"
+          aria-expanded="false"
+          aria-controls="accordion-segments-body"
+        >
+          <svg class="caret" viewBox="0 0 10 6" fill="none" aria-hidden="true">
+            <path d="M1 1l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          <span class="accordion-title">Segments</span>
+          <span class="accordion-summary" id="segments-summary">All Subscribers</span>
+          <svg class="accordion-lock" viewBox="0 0 16 16" fill="none" aria-label="Requires upgrade" role="img">
+            <rect x="3" y="7" width="10" height="7" rx="1.5" stroke="currentColor" stroke-width="1.2"/>
+            <path d="M5.5 7V5a2.5 2.5 0 015 0v2" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
+          </svg>
+        </button>
+        <div class="accordion-body hidden" id="accordion-segments-body" role="region" aria-labelledby="btn-accordion-segments">
+          <fieldset>
+            <legend class="sr-only">Segment targeting</legend>
+            <div class="form-group">
+              <label class="segment-item">
+                <input type="radio" name="segment-target" value="all" checked aria-label="Send to all subscribers">
+                <span class="segment-item-label">All Subscribers</span>
+              </label>
+              <label class="segment-item">
+                <input type="radio" name="segment-target" value="select" aria-label="Select specific segments">
+                <span class="segment-item-label">Select Segments</span>
+              </label>
+            </div>
+          </fieldset>
+
+          <div id="segment-select-area" class="hidden">
+            <div class="form-group">
+              <label class="sr-only" for="segment-search">Search segments</label>
+              <input
+                id="segment-search"
+                class="form-input"
+                type="search"
+                placeholder="Search segments..."
+                aria-label="Search segments"
+              >
+            </div>
+
+            <ul class="segment-list" id="segment-list" role="group" aria-label="Available segments">
+              <!-- Segment items populated by JS -->
+            </ul>
+
+            <p class="segment-reach" id="segment-reach" aria-live="polite">
+              Estimated reach: <strong id="segment-reach-count">--</strong> subscribers
+            </p>
+          </div>
+
+          <div class="upgrade-nudge hidden" id="segments-upgrade-nudge" role="note">
+            <span class="upgrade-nudge-text">Segment targeting available on Growth plan and above.</span>
+            <button type="button" class="btn btn-upgrade btn-sm" id="btn-upgrade-segments">Upgrade</button>
+          </div>
+
+          <!-- Inline create segment form -->
+          <details id="create-segment-inline">
+            <summary class="btn-link">Create from this URL</summary>
+            <div class="inline-form">
+              <div class="form-group">
+                <label class="form-label" for="new-segment-name">Segment name</label>
+                <input id="new-segment-name" class="form-input" type="text" placeholder="e.g. Blog Readers">
+              </div>
+              <div class="inline-form-row">
+                <button type="button" class="btn btn-primary btn-sm" id="btn-create-segment-inline">Create</button>
+              </div>
+            </div>
+          </details>
+        </div>
+      </div>
+
+      <!-- ── Accordion: Action Buttons ─────────────── -->
+      <div class="accordion" id="accordion-actions" data-accordion="actions" aria-expanded="false">
+        <button
+          class="accordion-header"
+          type="button"
+          id="btn-accordion-actions"
+          aria-expanded="false"
+          aria-controls="accordion-actions-body"
+        >
+          <svg class="caret" viewBox="0 0 10 6" fill="none" aria-hidden="true">
+            <path d="M1 1l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          <span class="accordion-title">Action Buttons</span>
+          <svg class="accordion-lock" viewBox="0 0 16 16" fill="none" aria-label="Requires upgrade" role="img">
+            <rect x="3" y="7" width="10" height="7" rx="1.5" stroke="currentColor" stroke-width="1.2"/>
+            <path d="M5.5 7V5a2.5 2.5 0 015 0v2" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
+          </svg>
+        </button>
+        <div class="accordion-body hidden" id="accordion-actions-body" role="region" aria-labelledby="btn-accordion-actions">
+          <div class="upgrade-nudge hidden" id="actions-upgrade-nudge" role="note">
+            <span class="upgrade-nudge-text">Action buttons available on Growth plan and above.</span>
+            <button type="button" class="btn btn-upgrade btn-sm" id="btn-upgrade-actions">Upgrade</button>
+          </div>
+
+          <!-- Button 1 -->
+          <fieldset id="action-btn-1-group">
+            <legend class="form-label">Button 1</legend>
+            <div class="form-group">
+              <label class="form-label" for="action-btn-1-label">Label</label>
+              <input
+                id="action-btn-1-label"
+                class="form-input"
+                type="text"
+                maxlength="40"
+                placeholder="e.g. Learn More"
+              >
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="action-btn-1-url">URL</label>
+              <input
+                id="action-btn-1-url"
+                class="form-input"
+                type="url"
+                maxlength="256"
+                placeholder="https://example.com"
+              >
+            </div>
+          </fieldset>
+
+          <!-- Social links quick-fill -->
+          <div id="social-links-picker" class="social-links-picker hidden">
+            <label class="form-label form-label-sm">Quick-fill from page</label>
+            <div id="social-links-list" class="social-links-list"></div>
+          </div>
+
+          <!-- Add Button 2 link -->
+          <button type="button" class="btn-link" id="btn-add-action-2">+ Add Button 2</button>
+
+          <!-- Button 2 (hidden by default) -->
+          <fieldset id="action-btn-2-group" class="hidden">
+            <legend class="form-label">Button 2</legend>
+            <div class="form-group">
+              <label class="form-label" for="action-btn-2-label">Label</label>
+              <input
+                id="action-btn-2-label"
+                class="form-input"
+                type="text"
+                maxlength="40"
+                placeholder="e.g. Dismiss"
+              >
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="action-btn-2-url">URL</label>
+              <input
+                id="action-btn-2-url"
+                class="form-input"
+                type="url"
+                maxlength="256"
+                placeholder="https://example.com"
+              >
+            </div>
+            <button type="button" class="btn-link text-danger" id="btn-remove-action-2">Remove Button 2</button>
+          </fieldset>
+        </div>
+      </div>
+
+      <!-- ── Accordion: UTM Parameters ─────────────── -->
+      <div class="accordion" id="accordion-utm" data-accordion="utm" aria-expanded="false">
+        <button
+          class="accordion-header"
+          type="button"
+          id="btn-accordion-utm"
+          aria-expanded="false"
+          aria-controls="accordion-utm-body"
+        >
+          <svg class="caret" viewBox="0 0 10 6" fill="none" aria-hidden="true">
+            <path d="M1 1l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          <span class="accordion-title">UTM Parameters</span>
+          <span class="accordion-summary" id="utm-summary">Enabled</span>
+        </button>
+        <div class="accordion-body hidden" id="accordion-utm-body" role="region" aria-labelledby="btn-accordion-utm">
+          <label class="segment-item">
+            <input type="checkbox" id="utm-enable" aria-label="Enable UTM parameters">
+            <span class="segment-item-label">Enable UTM tracking</span>
+          </label>
+
+          <div id="utm-fields" class="hidden">
+            <div class="form-group">
+              <label class="form-label" for="utm-source">Source</label>
+              <input id="utm-source" class="form-input" type="text" placeholder="pushengage" maxlength="80">
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="utm-medium">Medium</label>
+              <input id="utm-medium" class="form-input" type="text" placeholder="push" maxlength="80">
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="utm-campaign">Campaign</label>
+              <input id="utm-campaign" class="form-input" type="text" placeholder="campaign-name" maxlength="80">
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="utm-term">Term</label>
+              <input id="utm-term" class="form-input" type="text" placeholder="(optional)" maxlength="80">
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="utm-content">Content</label>
+              <input id="utm-content" class="form-input" type="text" placeholder="(optional)" maxlength="120">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── Accordion: Schedule ───────────────────── -->
+      <div class="accordion" id="accordion-schedule" data-accordion="schedule" aria-expanded="false">
+        <button
+          class="accordion-header"
+          type="button"
+          id="btn-accordion-schedule"
+          aria-expanded="false"
+          aria-controls="accordion-schedule-body"
+        >
+          <svg class="caret" viewBox="0 0 10 6" fill="none" aria-hidden="true">
+            <path d="M1 1l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          <span class="accordion-title">Schedule</span>
+          <span class="accordion-summary" id="schedule-summary">Send Now</span>
+          <svg class="accordion-lock" viewBox="0 0 16 16" fill="none" aria-label="Requires upgrade" role="img">
+            <rect x="3" y="7" width="10" height="7" rx="1.5" stroke="currentColor" stroke-width="1.2"/>
+            <path d="M5.5 7V5a2.5 2.5 0 015 0v2" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
+          </svg>
+        </button>
+        <div class="accordion-body hidden" id="accordion-schedule-body" role="region" aria-labelledby="btn-accordion-schedule">
+          <div class="upgrade-nudge hidden" id="schedule-upgrade-nudge" role="note">
+            <span class="upgrade-nudge-text">Scheduled send available on Growth plan and above.</span>
+            <button type="button" class="btn btn-upgrade btn-sm" id="btn-upgrade-schedule">Upgrade</button>
+          </div>
+
+          <fieldset>
+            <legend class="sr-only">Send timing</legend>
+            <div class="form-group">
+              <label class="segment-item">
+                <input type="radio" name="schedule-type" value="now" checked aria-label="Send immediately">
+                <span class="segment-item-label">Send Now</span>
+              </label>
+              <label class="segment-item">
+                <input type="radio" name="schedule-type" value="later" aria-label="Schedule for later">
+                <span class="segment-item-label">Schedule for Later</span>
+              </label>
+            </div>
+          </fieldset>
+
+          <div id="schedule-fields" class="hidden">
+            <div class="form-group">
+              <label class="form-label" for="schedule-date">Date</label>
+              <input id="schedule-date" class="form-input" type="date" aria-label="Scheduled date">
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="schedule-time">Time</label>
+              <input id="schedule-time" class="form-input" type="time" aria-label="Scheduled time">
+            </div>
+            <label class="segment-item">
+              <input type="checkbox" id="schedule-subscriber-tz" aria-label="Send in subscriber timezone">
+              <span class="segment-item-label">Send in subscriber's timezone</span>
+            </label>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /.screen-scroll -->
+
+    <!-- ── Action Bar ──────────────────────────────── -->
+    <div class="action-bar">
+      <div class="action-bar-row">
+        <button type="button" class="btn btn-secondary" id="btn-save-draft" aria-label="Save campaign as draft">
+          Save Draft
+        </button>
+        <button type="button" class="btn btn-primary" id="btn-send-now" aria-label="Send campaign now">
+          Send Now
+        </button>
+      </div>
+      <div class="action-bar-link">
+        <a
+          class="btn-link"
+          id="link-open-dashboard"
+          href="https://app.pushengage.com"
+          target="_blank"
+          rel="noopener noreferrer"
+        >Open in Dashboard</a>
+      </div>
+    </div>
+
+  </section>
+
+
+  <!-- ============================================== -->
+  <!-- SCREEN: INSIGHTS                               -->
+  <!-- ============================================== -->
+  <section id="screen-insights" class="screen hidden" aria-label="Insights">
+    <div class="screen-header">
+      <button class="btn-back" type="button" id="btn-back-insights" aria-label="Back to compose">
+        <svg viewBox="0 0 14 14" fill="none" aria-hidden="true">
+          <path d="M9 2L4 7l5 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </button>
+      <h2 class="screen-header-title">Insights</h2>
+    </div>
+
+    <div class="screen-scroll">
+
+      <!-- Section A: Account Health Snapshot -->
+      <div class="insight-section">
+        <h3 class="insight-section-title">Your Account</h3>
+        <div class="health-grid" id="health-grid">
+          <div class="health-card" id="health-card-subs" role="button" tabindex="0">
+            <span class="health-card-value" id="health-val-subs">--</span>
+            <span class="health-card-label" id="health-lbl-subs">Subscribers</span>
+          </div>
+          <div class="health-card" id="health-card-metric" role="button" tabindex="0">
+            <span class="health-card-value" id="health-val-metric">--</span>
+            <span class="health-card-label" id="health-lbl-metric">--</span>
+          </div>
+          <div class="health-card" id="health-card-campaigns" role="button" tabindex="0">
+            <span class="health-card-value" id="health-val-campaigns">--</span>
+            <span class="health-card-label" id="health-lbl-campaigns">Campaigns</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Section B: JTBD Recommendations -->
+      <div class="insight-section">
+        <div class="insight-section-title" style="display:flex;align-items:center;justify-content:space-between;">
+          Recommended For You
+          <button type="button" class="btn-ai-sm" id="btn-refresh-recs" title="Refresh recommendations">Refresh</button>
+        </div>
+        <div id="recommendations-container">
+          <div class="rec-card" style="text-align:center;color:var(--pe-gray-400);padding:20px;">
+            Analyzing your account...
+          </div>
+        </div>
+      </div>
+
+      <!-- Section C: Footer -->
+      <div class="insight-section text-center">
+        <a
+          class="btn-link"
+          id="link-full-analytics"
+          href="https://app.pushengage.com/analytics/overview?utm_source=extension&utm_medium=insights-footer&utm_campaign=view-analytics"
+          target="_blank"
+          rel="noopener noreferrer"
+        >View Full Analytics &rarr;</a>
+      </div>
+
+    </div>
+  </section>
+
+
+  <!-- ============================================== -->
+  <!-- SCREEN: SEGMENT MANAGER                        -->
+  <!-- ============================================== -->
+  <section id="screen-segments" class="screen hidden" aria-label="Segment Manager">
+    <div class="screen-header">
+      <button class="btn-back" type="button" id="btn-back-segments" aria-label="Back to compose">
+        <svg viewBox="0 0 14 14" fill="none" aria-hidden="true">
+          <path d="M9 2L4 7l5 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </button>
+      <h2 class="screen-header-title">Segment Manager</h2>
+    </div>
+
+    <div class="screen-scroll">
+
+      <!-- Current Page URL -->
+      <div class="segment-mgr-section">
+        <h3 class="segment-mgr-title">Current Page</h3>
+        <div class="segment-mgr-url" id="segment-mgr-current-url" aria-label="Current page URL">
+          Loading current page...
+        </div>
+      </div>
+
+      <!-- Add to Existing Segment -->
+      <div class="segment-mgr-section">
+        <h3 class="segment-mgr-title">Add to Existing Segment</h3>
+        <div class="form-group">
+          <label class="sr-only" for="segment-mgr-search">Search existing segments</label>
+          <input
+            id="segment-mgr-search"
+            class="form-input"
+            type="search"
+            placeholder="Search segments..."
+            aria-label="Search existing segments"
+          >
+        </div>
+        <ul class="segment-mgr-list" id="segment-mgr-list" aria-label="Existing segments">
+          <li class="segment-mgr-item">
+            <span class="segment-mgr-item-name">Loading segments...</span>
+          </li>
+        </ul>
+      </div>
+
+      <!-- Create New Segment -->
+      <div class="segment-mgr-section">
+        <h3 class="segment-mgr-title">Create New Segment</h3>
+
+        <fieldset>
+          <legend class="form-label">URL matching rule</legend>
+          <div class="form-group">
+            <label class="segment-item">
+              <input type="radio" name="segment-rule" value="exact" checked>
+              <span class="segment-item-label">Exact URL</span>
+            </label>
+            <label class="segment-item">
+              <input type="radio" name="segment-rule" value="topic">
+              <span class="segment-item-label">Topic (contains path segment)</span>
+            </label>
+            <label class="segment-item">
+              <input type="radio" name="segment-rule" value="broad">
+              <span class="segment-item-label">Broad (domain + any subpath)</span>
+            </label>
+            <label class="segment-item">
+              <input type="radio" name="segment-rule" value="custom">
+              <span class="segment-item-label">Custom pattern</span>
+            </label>
+          </div>
+        </fieldset>
+
+        <div class="form-group">
+          <label class="form-label" for="segment-mgr-new-name">
+            Segment name
+            <button type="button" class="btn-ai-sm" id="btn-ai-segment-name" title="AI suggest name">AI</button>
+          </label>
+          <input
+            id="segment-mgr-new-name"
+            class="form-input"
+            type="text"
+            placeholder="e.g. Blog Readers"
+            aria-required="true"
+          >
+        </div>
+
+        <div class="form-group" id="segment-custom-pattern-group" class="hidden">
+          <label class="form-label" for="segment-custom-pattern">Custom URL pattern</label>
+          <input
+            id="segment-custom-pattern"
+            class="form-input"
+            type="text"
+            placeholder="e.g. /blog/*"
+          >
+        </div>
+
+        <label class="segment-item">
+          <input type="checkbox" id="segment-auto-add" aria-label="Automatically add future matching URLs">
+          <span class="segment-item-label">Auto-add future matching URLs</span>
+        </label>
+
+        <button type="button" class="btn btn-primary btn-block" id="btn-create-segment">
+          Create Segment
+        </button>
+      </div>
+
+    </div><!-- /.screen-scroll -->
+  </section>
+
+
+  <!-- ============================================== -->
+  <!-- SCREEN: SETTINGS                               -->
+  <!-- ============================================== -->
+  <section id="screen-settings" class="screen hidden" aria-label="Settings">
+    <div class="screen-header">
+      <button class="btn-back" type="button" id="btn-back-settings" aria-label="Back to compose">
+        <svg viewBox="0 0 14 14" fill="none" aria-hidden="true">
+          <path d="M9 2L4 7l5 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </button>
+      <h2 class="screen-header-title">Settings</h2>
+    </div>
+
+    <div class="screen-scroll">
+      <div class="settings-section">
+
+        <!-- Auto-extract toggle -->
+        <div class="form-group">
+          <div class="toggle-switch">
+            <input type="checkbox" id="setting-auto-extract" checked aria-label="Auto-extract page content">
+            <label class="toggle-label" for="setting-auto-extract">Auto-extract page content</label>
+          </div>
+          <span class="form-label form-hint">
+            Automatically fill title, message, URL, and images from the current page.
+          </span>
+        </div>
+
+        <!-- Default UTM Source -->
+        <div class="form-group">
+          <label class="form-label" for="setting-utm-source">Default UTM Source</label>
+          <input
+            id="setting-utm-source"
+            class="form-input"
+            type="text"
+            placeholder="pushengage"
+            aria-describedby="setting-utm-source-hint"
+          >
+          <span id="setting-utm-source-hint" class="form-label form-hint">
+            Pre-fills the UTM source field when composing campaigns.
+          </span>
+        </div>
+
+        <!-- Default UTM Medium -->
+        <div class="form-group">
+          <label class="form-label" for="setting-utm-medium">Default UTM Medium</label>
+          <input
+            id="setting-utm-medium"
+            class="form-input"
+            type="text"
+            placeholder="push"
+            aria-describedby="setting-utm-medium-hint"
+          >
+          <span id="setting-utm-medium-hint" class="form-label form-hint">
+            Pre-fills the UTM medium field when composing campaigns.
+          </span>
+        </div>
+
+      </div>
+    </div><!-- /.screen-scroll -->
+  </section>
+
+
+  <!-- ============================================== -->
+  <!-- SHARED: Modal Overlay (reusable, hidden)       -->
+  <!-- ============================================== -->
+  <div class="modal-overlay hidden" id="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="modal-heading">
+    <div class="modal-card">
+      <h2 class="modal-title" id="modal-heading">Confirm</h2>
+      <div class="modal-body" id="modal-body">
+        Are you sure you want to proceed?
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="btn btn-secondary" id="btn-modal-cancel">Cancel</button>
+        <button type="button" class="btn btn-primary" id="btn-modal-confirm">Confirm</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================== -->
+  <!-- SHARED: Toast (hidden)                         -->
+  <!-- ============================================== -->
+  <div class="toast toast--success hidden" id="toast" role="status" aria-live="polite">
+    Action completed successfully.
+  </div>
+
+  <!-- ============================================== -->
+  <!-- SHARED: Loading Spinner (hidden)               -->
+  <!-- ============================================== -->
+  <div class="loading-overlay hidden" id="loading-overlay" aria-label="Loading">
+    <div class="loading-spinner" role="progressbar" aria-label="Loading content"></div>
+  </div>
+
+  <script type="module" src="popup.js"></script>
+</body>
+</html>

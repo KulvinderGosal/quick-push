@@ -1,0 +1,54 @@
+{
+  "manifest_version": 3,
+  "name": "PushEngage Extension",
+  "version": "2.0.0",
+  "description": "PushEngage browser extension — create campaigns, manage segments, and view insights from any webpage.",
+  "permissions": [
+    "activeTab",
+    "tabs",
+    "scripting",
+    "storage",
+    "alarms"
+  ],
+  "optional_permissions": [
+    "contextMenus"
+  ],
+  "host_permissions": [
+    "https://dashboard-public-api.pushengage.com/*",
+    "https://app.pushengage.com/*",
+    "https://generativelanguage.googleapis.com/*"
+  ],
+  "optional_host_permissions": [
+    "<all_urls>"
+  ],
+  "action": {
+    "default_popup": "popup.html",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "32": "icons/icon32.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    }
+  },
+  "background": {
+    "service_worker": "background.js"
+  },
+  "icons": {
+    "16": "icons/icon16.png",
+    "32": "icons/icon32.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+  "content_security_policy": {
+    "extension_pages": "script-src 'self'; object-src 'none'; style-src 'self' 'unsafe-inline';"
+  },
+  "commands": {
+    "create-campaign": {
+      "suggested_key": {
+        "default": "Ctrl+Shift+P",
+        "mac": "Command+Shift+P"
+      },
+      "description": "Create campaign from current page"
+    }
+  }
+}

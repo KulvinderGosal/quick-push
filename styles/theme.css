@@ -1,0 +1,101 @@
+:root {
+  --pe-navy: #191A35;
+  --pe-blue: #3B43FF;
+  --pe-blue-hover: #2F36D9;
+  --pe-blue-light: #EAEBFF;
+  --pe-gold: #FFD37D;
+  --pe-gold-light: #FFF4DC;
+  --pe-white: #FFFFFF;
+  --pe-gray-50: #F9FAFB;
+  --pe-gray-100: #F3F4F6;
+  --pe-gray-200: #E5E7EB;
+  --pe-gray-300: #D1D5DB;
+  --pe-gray-400: #9CA3AF;
+  --pe-gray-500: #6B7280;
+  --pe-gray-600: #4B5563;
+  --pe-gray-700: #374151;
+  --pe-gray-800: #1F2937;
+  --pe-green: #10B981;
+  --pe-green-light: #D1FAE5;
+  --pe-red: #EF4444;
+  --pe-red-light: #FEE2E2;
+  --pe-amber: #F59E0B;
+  --pe-amber-light: #FEF3C7;
+  --font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --text-xs: 11px;
+  --text-sm: 12px;
+  --text-base: 13px;
+  --text-md: 14px;
+  --text-lg: 16px;
+  --text-xl: 18px;
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 12px;
+  --space-lg: 16px;
+  --space-xl: 20px;
+  --space-2xl: 24px;
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 8px;
+  --radius-xl: 12px;
+  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.04);
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.08), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -4px rgba(0, 0, 0, 0.04);
+  --shadow-blue: 0 0 0 3px rgba(59, 67, 255, 0.12);
+  --shadow-gold: 0 0 0 3px rgba(255, 211, 125, 0.25);
+  --popup-width: 420px;
+  --popup-max-height: 600px;
+  --transition-fast: 0.15s ease;
+  --transition-med: 0.2s ease;
+  --transition-bounce: 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('../fonts/Inter-Regular.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url('../fonts/Inter-Medium.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url('../fonts/Inter-SemiBold.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url('../fonts/Inter-Bold.woff2') format('woff2');
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { width: var(--popup-width); font-size: var(--text-base); }
+body {
+  width: var(--popup-width);
+  max-height: var(--popup-max-height);
+  font-family: var(--font-family);
+  color: var(--pe-navy);
+  background: var(--pe-gray-50);
+  line-height: 1.5;
+  overflow-x: hidden;
+  overflow-y: auto;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--pe-gray-300); border-radius: 2px; }
+.hidden { display: none !important; }
+.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); border: 0; }
