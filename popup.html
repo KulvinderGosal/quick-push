@@ -368,6 +368,60 @@
       font-weight: 600;
     }
 
+    /* ── EMOJI PICKER ────────────────────────────────────── */
+    .label-actions {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+    .emoji-btn {
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-size: 13px;
+      padding: 1px 3px;
+      border-radius: var(--radius-sm);
+      line-height: 1;
+      color: var(--pe-gray-500);
+      transition: background var(--transition-fast), color var(--transition-fast);
+      flex-shrink: 0;
+    }
+    .emoji-btn:hover {
+      background: var(--pe-gray-100);
+      color: var(--pe-navy);
+    }
+    .emoji-panel {
+      position: fixed;
+      z-index: 9999;
+      background: var(--pe-white);
+      border: 1.5px solid var(--pe-gray-200);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-lg);
+      padding: 6px;
+      display: grid;
+      grid-template-columns: repeat(8, 30px);
+      gap: 2px;
+      width: 264px;
+      max-height: 192px;
+      overflow-y: auto;
+    }
+    .emoji-panel.hidden { display: none; }
+    .emoji-item {
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-size: 16px;
+      width: 30px;
+      height: 30px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: var(--radius-sm);
+      padding: 0;
+      transition: background var(--transition-fast);
+    }
+    .emoji-item:hover { background: var(--pe-blue-light); }
+
     /* ── AI GENERATE BUTTON ─────────────────────────────── */
     .btn-ai-generate {
       display: flex;
@@ -1658,7 +1712,10 @@
         <div class="form-group">
           <label class="form-label" for="campaign-title">
             Title
-            <span class="char-counter" id="title-counter" aria-live="polite">0 / 85</span>
+            <span class="label-actions">
+              <button class="emoji-btn" type="button" id="emoji-btn-title" title="Insert emoji" aria-label="Insert emoji">😊</button>
+              <span class="char-counter" id="title-counter" aria-live="polite">0 / 85</span>
+            </span>
           </label>
           <input
             id="campaign-title"
@@ -1673,7 +1730,10 @@
         <div class="form-group">
           <label class="form-label" for="campaign-message">
             Message
-            <span class="char-counter" id="message-counter" aria-live="polite">0 / 135</span>
+            <span class="label-actions">
+              <button class="emoji-btn" type="button" id="emoji-btn-message" title="Insert emoji" aria-label="Insert emoji">😊</button>
+              <span class="char-counter" id="message-counter" aria-live="polite">0 / 135</span>
+            </span>
           </label>
           <textarea
             id="campaign-message"
