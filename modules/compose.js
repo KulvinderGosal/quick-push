@@ -74,8 +74,12 @@ function setLoading(on) {
   if (overlay) overlay.classList.toggle('hidden', !on);
 }
 
+function charCount(str) {
+  return [...(str || '')].length;
+}
+
 function updateCounter(inputEl, counterEl, max) {
-  const len = (inputEl.value || '').length;
+  const len = charCount(inputEl.value);
   counterEl.textContent = `${len} / ${max}`;
   counterEl.classList.remove('counter-warn', 'counter-danger');
   if (len >= max * COUNTER_DANGER) {
@@ -535,6 +539,8 @@ export async function initCompose() {
   if (titleInput && titleCounter) {
     updateCounter(titleInput, titleCounter, TITLE_MAX);
     titleInput.addEventListener('input', () => {
+      const chars = [...titleInput.value];
+      if (chars.length > TITLE_MAX) titleInput.value = chars.slice(0, TITLE_MAX).join('');
       updateCounter(titleInput, titleCounter, TITLE_MAX);
       setState('compose.title', titleInput.value);
     });
@@ -542,6 +548,8 @@ export async function initCompose() {
   if (messageInput && messageCounter) {
     updateCounter(messageInput, messageCounter, MESSAGE_MAX);
     messageInput.addEventListener('input', () => {
+      const chars = [...messageInput.value];
+      if (chars.length > MESSAGE_MAX) messageInput.value = chars.slice(0, MESSAGE_MAX).join('');
       updateCounter(messageInput, messageCounter, MESSAGE_MAX);
       setState('compose.message', messageInput.value);
     });
@@ -1400,13 +1408,13 @@ function buildPayload() {
     return null;
   }
 
-  // Backend length limits
-  if (title.length > 85) {
+  // Backend length limits (emoji-aware: count Unicode code points, not UTF-16 code units)
+  if (charCount(title) > 85) {
     showToast('Title must be 85 characters or less', 'error');
     titleInput?.focus();
     return null;
   }
-  if (message.length > 135) {
+  if (charCount(message) > 135) {
     showToast('Message must be 135 characters or less', 'error');
     messageInput?.focus();
     return null;
@@ -1429,7 +1437,7 @@ function buildPayload() {
     notification_url: url,
     notification_image: iconUrl || undefined,
     big_image: bigImageUrl || undefined,
-    source: 'Dashboard',
+    source: 'ChromeExtension',
     status: 'sent'
   };
 

@@ -26,8 +26,9 @@ export function sanitizeImageUrl(src) {
 
 export function truncate(str, maxLen) {
   if (typeof str !== 'string') return '';
-  if (str.length <= maxLen) return str;
-  const truncated = str.substring(0, maxLen);
+  const chars = [...str];
+  if (chars.length <= maxLen) return str;
+  const truncated = chars.slice(0, maxLen).join('');
   const lastSpace = truncated.lastIndexOf(' ');
   return lastSpace > maxLen * 0.7 ? truncated.substring(0, lastSpace) : truncated;
 }
