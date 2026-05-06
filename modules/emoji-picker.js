@@ -69,19 +69,19 @@ export function initEmojiPicker() {
 }
 
 function positionPanel(panel, anchor) {
-  panel.classList.remove('hidden');
   const rect = anchor.getBoundingClientRect();
-  const panelW = 256;
+  const panelW = 266;
   const left = Math.max(4, Math.min(rect.right - panelW, document.documentElement.clientWidth - panelW - 4));
   panel.style.top = `${rect.bottom + 4}px`;
   panel.style.left = `${left}px`;
-  panel.classList.add('hidden');
 }
 
 function insertAtCursor(el, text) {
   const start = el.selectionStart ?? el.value.length;
   const end = el.selectionEnd ?? el.value.length;
   el.value = el.value.slice(0, start) + text + el.value.slice(end);
-  el.selectionStart = el.selectionEnd = start + [...text].length;
+  // Use text.length (code units) not [...text].length (code points) because
+  // selectionStart is a code unit index — astral emoji are 2 code units each.
+  el.selectionStart = el.selectionEnd = start + text.length;
   el.focus();
 }
