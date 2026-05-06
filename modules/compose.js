@@ -1437,7 +1437,8 @@ function buildPayload() {
     notification_url: url,
     notification_image: iconUrl || undefined,
     big_image: bigImageUrl || undefined,
-    source: 'ChromeExtension',
+    source: 'Dashboard',
+    notification_tag: 'chrome-extension',
     status: 'sent'
   };
 

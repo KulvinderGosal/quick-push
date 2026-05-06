@@ -11,6 +11,7 @@ import { restoreSession, loginWithToken, logoutUser, touchActivity } from './mod
 import { setText } from './modules/sanitize.js';
 import { initHeader } from './modules/header.js';
 import { fetchPageData, initCompose } from './modules/compose.js';
+import { initEmojiPicker } from './modules/emoji-picker.js';
 import { initInsights } from './modules/insights.js';
 import { initSegments } from './modules/segments.js';
 import { initSettings } from './modules/settings.js';
@@ -204,6 +205,7 @@ async function bootApp() {
     Promise.resolve(initSegments()),
     initSettings()
   ]);
+  initEmojiPicker();
 }
 
 // ── Startup ──────────────────────────────────────────────────
