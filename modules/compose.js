@@ -1190,7 +1190,7 @@ function setupUtm(prefs = {}) {
 
   // Source = where traffic comes from (PushEngage), NOT the destination brand
   // Medium = channel type (push notification)
-  if (sourceInput) sourceInput.value = siteUtm.utm_source || 'pushengage';
+  if (sourceInput) sourceInput.value = siteUtm.utm_source || 'chrome-extension';
   if (mediumInput) mediumInput.value = siteUtm.utm_medium || 'push_notification';
   if (campaignInput) campaignInput.value = pageTitleSlug || siteUtm.utm_campaign || '';
   if (termInput) termInput.value = pageKeywords || pageTypeSlug || siteUtm.utm_term || '';
