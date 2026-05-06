@@ -39,6 +39,8 @@ async function request(method, path, body = null) {
     if (typeof data?.message === 'string') msg = data.message;
     else if (typeof data?.error === 'string') msg = data.error;
     else if (typeof data?.error?.message === 'string') msg = data.error.message;
+    // Log full error details to console for debugging
+    console.error('[api] Error response:', JSON.stringify(data, null, 2));
     throw new ApiError(msg, response.status, data);
   }
   return data;
