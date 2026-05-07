@@ -55,12 +55,11 @@ export function initEmojiPicker() {
     });
   });
 
-  // Insert emoji into the active input
+  // Insert emoji into the active input — keep panel open for multi-select
   panel.addEventListener('click', (e) => {
     const item = e.target.closest('.emoji-item');
     if (!item || !activeInput) return;
     insertAtCursor(activeInput, item.dataset.emoji);
-    panel.classList.add('hidden');
     activeInput.dispatchEvent(new Event('input', { bubbles: true }));
   });
 

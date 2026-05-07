@@ -1425,21 +1425,25 @@ function buildPayload() {
     return null;
   }
 
-  // Icon and big image
+  // Icon and big image — only include HTTPS URLs, never chrome-extension:// or data: URLs
   const iconImg = $('icon-preview-img');
   const featuredImg = $('featured-preview-img');
-  const iconUrl = iconImg && !iconImg.classList.contains('hidden') ? iconImg.src : undefined;
-  const bigImageUrl = featuredImg && !featuredImg.classList.contains('hidden') ? featuredImg.src : undefined;
+  const rawIconUrl = iconImg && !iconImg.classList.contains('hidden') ? iconImg.src : '';
+  const rawBigUrl = featuredImg && !featuredImg.classList.contains('hidden') ? featuredImg.src : '';
+  const iconUrl = rawIconUrl.startsWith('https://') ? rawIconUrl : undefined;
+  const bigImageUrl = rawBigUrl.startsWith('https://') ? rawBigUrl : undefined;
 
   const payload = {
     notification_title: title,
     notification_message: message,
     notification_url: url,
-    notification_image: iconUrl || undefined,
-    big_image: bigImageUrl || undefined,
+    notification_image: iconUrl,
+    big_image: bigImageUrl,
     source: 'Dashboard',
     status: 'sent'
   };
+
+  console.info('[compose] Sending payload:', JSON.stringify(payload, null, 2));
 
   // Segments
   const audienceType = getState('compose.audienceType') || 'all';

@@ -39,8 +39,15 @@ async function request(method, path, body = null) {
     if (typeof data?.message === 'string') msg = data.message;
     else if (typeof data?.error === 'string') msg = data.error;
     else if (typeof data?.error?.message === 'string') msg = data.error.message;
-    // Log full error details to console for debugging
+    // Log full error details (including validation details array) for debugging
     console.error('[api] Error response:', JSON.stringify(data, null, 2));
+    // Append first validation detail to the toast message if available
+    const details = data?.error?.details;
+    if (Array.isArray(details) && details.length > 0) {
+      const first = details[0];
+      const detail = typeof first === 'string' ? first : (first?.message || first?.msg || JSON.stringify(first));
+      msg = `${msg} (${detail})`;
+    }
     throw new ApiError(msg, response.status, data);
   }
   return data;
