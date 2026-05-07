@@ -55,15 +55,16 @@ export function initEmojiPicker() {
     });
   });
 
-  // Insert emoji into the active input — keep panel open for multi-select
+  // Insert emoji — stop propagation so the document close handler doesn't fire
   panel.addEventListener('click', (e) => {
+    e.stopPropagation();
     const item = e.target.closest('.emoji-item');
     if (!item || !activeInput) return;
     insertAtCursor(activeInput, item.dataset.emoji);
     activeInput.dispatchEvent(new Event('input', { bubbles: true }));
   });
 
-  // Close panel when clicking anywhere outside
+  // Close panel only when clicking outside it
   document.addEventListener('click', () => panel.classList.add('hidden'));
 }
 

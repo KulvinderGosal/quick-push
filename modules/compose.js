@@ -1440,6 +1440,7 @@ function buildPayload() {
     notification_image: iconUrl,
     big_image: bigImageUrl,
     source: 'Dashboard',
+    tags: ['Chrome-Extension'],
     status: 'sent'
   };
 
